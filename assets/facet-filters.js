@@ -217,6 +217,7 @@ if (!customElements.get('facet-filters')) {
       let search_new_link = window.location.pathname.split('?')[0].split('collections/')[1];
       let col_handle = '';
       let catTagDis = '';
+      let sortBy = 'title-ascending';
       
       if(searchParams){
         let allflts = searchParams.split('&');
@@ -230,6 +231,9 @@ if (!customElements.get('facet-filters')) {
             }
             if(akey == "idiscipline"){
               meta_discipline = a.split('=')[1];
+            }
+            if(akey == "sort_by"){
+              sortBy = a.split('=')[1];
             }
             // if(akey == "promo_codes"){
             //   ajax_url.replace(a, "");
@@ -352,6 +356,31 @@ if (!customElements.get('facet-filters')) {
                   if(search_tmpl_2.content.getElementById('products_grid').innerHTML !== null){
                     search_results_grid += search_tmpl_2.content.getElementById('products_grid').innerHTML;
                   }
+                  // code for sorting start
+                  if((sortBy == "title-ascending") || (sortBy == "title-descending") || (sortBy == "price-ascending") || (sortBy == "price-descending")){
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(search_results_grid, 'text/html');
+                    const productElements = doc.querySelectorAll('.js-pagination-result');
+                    const products = [];
+                    productElements.forEach((productElement) => {
+                      const titleElement = productElement.querySelector('.card__title');
+                      const priceElement = productElement.querySelector('.price__current');
+                      const priceText = Number(priceElement.textContent.trim().replace('$',''));
+                      const titleText = titleElement.textContent.trim();
+                      const text = (sortBy.indexOf("price") > -1) ? priceText : titleText;
+                      products.push({ title: text, element: productElement });
+                    });
+                    if((sortBy == "title-ascending") || (sortBy == "price-ascending")){
+                      products.sort(compareTitlesAsc);
+                    }else if((sortBy == "title-descending") || (sortBy == "price-descending")){
+                      products.sort(compareTitlesDesc);
+                    }
+                    search_results_grid = "";
+                    products.map((productElement)=>{
+                      search_results_grid += productElement.element.outerHTML;
+                    });
+                  }
+                  // code for sorting end
                   tmpl.content.getElementById('products_grid').innerHTML = search_results_grid;
                   let items = tmpl.content.getElementById('products_grid').querySelectorAll('.js-pagination-result');
                   if(count > 24){
@@ -360,7 +389,7 @@ if (!customElements.get('facet-filters')) {
                     }
                     tmpl.content.querySelector('[aria-label="Pagination"]').innerHTML = `<div class="custom_pagination pagination--modern ml-auto mr-auto w-full text-center mb-10 custom_ajax_pagination">
                         <span class="custom_pagination-message">Showing 24 of `+count+`</span>
-                        <div class="pagination__bar relative mt-4" style="--pagination-percent: 33.6%;"></div>
+                        <div class="pagination__bar relative mt-4"></div>
                         <a onclick="loadmore()" href="#" class="btn custom_see_more btn--secondary mt-8">
                           Show more
                         </a>
@@ -430,9 +459,9 @@ if (!customElements.get('facet-filters')) {
               for(const c of all_cards){
                 let a_url = c.querySelector('a').getAttribute('href');
                 let c_preview = c.querySelector('.preview_c').getAttribute('data-product-url');
-                if(!a_url.includes(temp_collection) && !c_preview.includes(temp_collection)){ /// condition updated
-                // if(!a_url.includes(temp_collection)){
+                if(!a_url.includes(temp_collection) && !c_preview.includes(temp_collection)){
                   if(c.querySelector('a').classList.contains('membership_card')){
+                    c.querySelector('a').setAttribute('href', a_url);
                     c.querySelector('.preview_c').setAttribute('data-product-url',temp_collection+c_preview);
                   }else{
                     c.querySelector('a').setAttribute('href',temp_collection+a_url);
@@ -461,15 +490,13 @@ if (!customElements.get('facet-filters')) {
           const customPaginationObserver = new IntersectionObserver((entries) => {
               entries.forEach(entry => {
                   if(entry.isIntersecting) {
-                    setTimeout(function () {
-                      loadmore();
-                      intersectingTimer = setInterval(loadmore(), 1000);
-                    }, 1000);
+                    loadmore();
+                    intersectingTimer = setInterval(loadmore(), 1000);
                   } else {
                     clearInterval(intersectingTimer);
                   }
               });
-          }, { rootMargin: '1000px 0px' });
+          }, { rootMargin: `${window.innerHeight * 1.5}px 0px` });
           customPaginationObserver.observe($(".custom_pagination")[0]);
         }
         // Scroll to the top of the results if needed
@@ -621,3 +648,26 @@ function loadmore() {
     $(".custom_ajax_pagination").remove();
   }
 }
+// code for sorting start
+function compareTitlesAsc(a, b) {
+  // Sort ascending by default
+  if (a.title < b.title) {
+    return -1;
+  } else if (a.title > b.title) {
+    return 1;
+  }
+  // If titles are equal, return 0
+  return 0;
+}
+function compareTitlesDesc(a, b) {
+  // Sort descending by default
+  if (a.title < b.title) {
+    return 1;
+  } else if (a.title > b.title) {
+    return -1;
+  }
+  // If titles are equal, return 0
+  return 0;
+}
+
+// code for sorting end

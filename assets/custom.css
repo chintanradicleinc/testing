@@ -49,6 +49,7 @@
 
 }
 
+
 footer h2.disclosure__title{
   padding-bottom: 0px;
 }
@@ -71,6 +72,10 @@ h1,h2,h3,h4,h5,h6 {
   color: #1758b6
 }
 
+.promo-links-category{
+  margin-top: 15px;
+}
+
 .template-search .section--template{
   margin: 50px 0px 25px 0px;
 }
@@ -82,10 +87,6 @@ h1,h2,h3,h4,h5,h6 {
 
 .course-drawer__content .price-with-addcart{
   gap: 0px !important;
-}
-
-.checkout_cart{
-  margin-bottom: 10px;
 }
 
 .about-us-container{
@@ -1114,7 +1115,6 @@ p {
   }
 }
 
-
 @media only screen and (min-width: 769px){
 
   .footer.bg-theme-bg{
@@ -1125,11 +1125,7 @@ p {
     padding: 15px 5px;
   }
 
-  /* .mega-nav--sidebar .main-nav__grandchild:not(.main-nav__grandchild-grid){
-        grid-template-rows: repeat(11, minmax(0, 21px)) !important;
-        grid-auto-flow: column;
-        grid-template-columns: repeat(5, 1fr) !important;
-  } */
+
 
   .mega-nav--sidebar .grid{
     margin-top: 10px;
@@ -1811,6 +1807,8 @@ p {
     width: 50% !important;
 } 
 
+
+  
 .cart-item__remove{
   margin-right: 8px !important;
 }  
@@ -1874,7 +1872,7 @@ cart-drawer .cart-drawer__summary .checkout_cart{
     max-width: 100% !important;
   }
 
-      
+    
     details[open] .main-nav__item-content a {
       text-decoration: underline;
     }
@@ -1956,7 +1954,7 @@ cart-drawer .cart-drawer__summary .checkout_cart{
   { 
     display: block;
     position: inherit;
-    width: 280px;
+    max-width: 200px;
   }
 
    .template-page_pt-approval .media-with-text__media .media,

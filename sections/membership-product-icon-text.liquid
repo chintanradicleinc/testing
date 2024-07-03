@@ -52,7 +52,7 @@
     <div class="media-with-icon-text media-with-text{% if block.settings.layout == 'right' %} media-with-text--reverse{% endif %}"{% if settings.animations_enabled != "disabled" %} data-cc-animate{% endif %} style="--media-width: {{ block.settings.media_width }}%">
       <div class="product-with-icon media-with-text__media{% if media_type == 'video' %} video-section{% endif %} relative flex flex-col justify-center overflow-hidden">
         <div class="media w-full{% if media_type == 'video' %} absolute{% if block.settings.image_fit == "cover" %} top-0 left-0 h-full{% else %} video-section__media{% endif %} video-played-hidden{% else %} relative{% if block.settings.image_fit == "cover" %} h-full video-section__media--cover{% endif %}{% endif %}"{% if media_type == 'image' and image != blank %} style="padding-top: {{ 1 | divided_by: image.aspect_ratio | times: 100 }}%;"{% endif %}>
-          {% assign product = all_products[block.settings.product_select] %}          
+          {% assign product = all_products[block.settings.product_select] %}
           {%- if product != blank -%}
                 <p class="rad_24 product-title-membership"> {{ product.title }}</p>
                {%- if block.settings.subtitle_product != blank -%}
@@ -171,7 +171,7 @@
         }
       ]
     },
-        {
+    {
       "type": "select",
       "id": "heading_align",
       "label": "Heading alignment",

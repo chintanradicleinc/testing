@@ -26,7 +26,9 @@
     {%- render 'doc-head-social' -%}
 
     <link rel="preload" href="{{ 'main.css' | asset_url }}" as="style">
-
+    <meta http-equiv="Expires" CONTENT="0" />
+    <meta http-equiv="Cache-Control" CONTENT="no-cache" />
+    <meta http-equiv="Pragma" CONTENT="no-cache" />
     {%- style %}
       {{- settings.body_font | font_face: font_display: 'swap' -}}
       {{- body_font_bold | font_face: font_display: 'swap' -}}
@@ -534,7 +536,6 @@
           }
           localStorage.setItem('selectedDiscipline',meta_discipline_tmp);
         {% endif %}
-        console.log(localStorage.getItem('selectedState'), localStorage.getItem('selectedDiscipline'));
       }
       defaultAccreditations();
       {% endif %}
@@ -542,18 +543,48 @@
       history.pushState(null, document.title, location.href);
       window.addEventListener('popstate', function (event){
         if (document.body.querySelector('.drawer[open]:not(.facets)')){
-          history.pushState(null, document.title, location.href);
+          // history.pushState(null, document.title, location.href);
           document.body.querySelector('.drawer[open]:not(.facets)').removeAttribute('open');
           document.body.style.top = '';
           document.body.classList.remove('fixed');
           document.body.querySelector('.overlay.is-visible').classList.remove('is-visible');
         }
+        // if (event.state && event.state.isBack === true) {
+        //   // Perform actions when user navigates back to the page
+        //   console.log('User navigated back to this page');
+          
+        //   // You can trigger specific actions or reload the page if necessary
+        //   // Example: window.location.reload();
+        // }
       });
+      // $(window).bind('pageshow', function(event) {
+      //   console.log("Iamhere", event.originalEvent);
+      //   if (event.originalEvent.persisted) {
+      //     console.log("persisted");
+      //     // When the page is loaded from the cache (using the back button), force a reload
+      //     window.location.reload(); 
+      //   }
+      // });
     </script>
+
 
     {% unless template contains "collection" %}
       {% render "quick-add-widget" section: section %}
       {{ 'product.css' | asset_url | stylesheet_tag }}
     {% endunless %}
+
+    <!-- Start of homeceu Zendesk Widget script -->
+    <script id="ze-snippet"
+            src="https://static.zdassets.com/ekr/snippet.js?key=742eb534-d1d6-4f6b-be38-775196f8d441"></script>
+    <script type="text/javascript">
+      window.zESettings = {
+        webWidget: {
+          offset: {
+            vertical: '50px'
+          }
+        }
+      };
+    </script>
+    <!-- End of homeceu Zendesk Widget script -->
   </body>
 </html>

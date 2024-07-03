@@ -40,7 +40,9 @@ $(window).on('load', function() {
     //   document.getElementById("button1").disabled=false;
     // }
  }
-  defaultDropdown();
+  if(document.getElementById("iOperation")){
+    defaultDropdown();
+  }
   $('#iFunction').on('change', function() {
     defaultDropdown();
   });

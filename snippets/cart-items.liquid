@@ -6,7 +6,6 @@
   {% render 'cart-items', is_drawer: true %}
 {%- endcomment -%}
 
-
 {%- if cart != empty -%}
   <script src="{{ 'cart-items.js' | asset_url }}" defer="defer"></script>
 {%- endif -%}
@@ -131,6 +130,21 @@
                       </div>
                     {%- endif -%}
                   {%- endfor -%}
+                  {% assign items = item.product.metafields.colibri.package_bundle_products.value %}
+                  {% if item.product.template_suffix contains 'pre-define-bundle' %}
+                    {% for pr in items %}
+                      <input type="hidden" name="attributes[{{ item.product.id }} Course {{ forloop.index }} ID]" value="{{ pr.id }}"/>
+                      <input type="hidden" name="attributes[{{ item.product.id }} Course {{ forloop.index }} Delivery Method]" value="{{pr.selected_or_first_available_variant.metafields.colibri.delivery_method }}"/>
+                      <input type="hidden" name="attributes[{{ item.product.id }} Course {{ forloop.index }} Hours]" value="{{pr.metafields.colibri.contact_hours }}"/>
+                      <input type="hidden" name="attributes[{{ item.product.id }} Course {{ forloop.index }} ID]" value="{{ pr.id }}"/>
+                      <input type="hidden" name="attributes[{{ item.product.id }} Course {{ forloop.index }} SKU]" value="{{ pr.selected_or_first_available_variant.sku }}"/>
+                      {% if product.type == "webinar" %}
+                        <input type="hidden" name="attributes[{{ item.product.id }} Course {{ forloop.index }} Start Date]" value="{{ pr.metafields.colibri.start_date }}"/>
+                        <input type="hidden" name="attributes[{{ item.product.id }} Course {{ forloop.index }} End Date]" value="{{ pr.metafields.colibri.end_date }}"/>
+                      {% endif %}
+                    {% endfor %}
+                  {% endif %}
+
                 </dl>
 
                 {%- if item.selling_plan_allocation != null -%}
