@@ -1,0 +1,81 @@
+<link rel="stylesheet" href="{{ 'media-with-text.css' | asset_url }}" media="print" onload="this.media='all'">
+
+{% for block in section.blocks %}
+  {% if block.type == 'product-box' %}
+    <div class="pt-rich-text section product-with-icon-text section--full-width section--padded  color-scheme color-scheme--2">
+      <div
+        class="media-with-icon-text media-with-text media-with-text--reverse cc-animate-init cc-animate-in"
+        data-cc-animate=""
+        style="--media-width: %"
+      >
+        {% assign product = all_products[block.settings.product] %}
+        {%- if product != blank and block.settings.select_layout == 'pro-box' -%}
+          <div class="product-with-icon media-with-text__media relative flex flex-col justify-center overflow-hidden">
+            {% if block.settings.text != blank %}
+              <p class="rad_18 h6 sub-heading-font mb-0 flex-auto text-center">{{ block.settings.text }}</p>
+            {% endif %}
+            <del class="order-list__line.variant.compare_at_price"></del>
+            <div class="product-info__block_member">
+              {% render 'price', product: product, use_variant: true %}
+              {% assign product_url = product.url | within: collection %}
+              
+              {% render 'preview-course-button', settings: settings, product: product, product_url:product_url, section_id: section.id, product_not_for_sale: product_not_for_sale  %}              
+            </div>
+          </div>
+        {% elsif product != blank and block.settings.select_layout == 'pro-button' %}
+          <div class="pro_button">
+            <div class="section__block text-center promo-strip__button">
+{%- if settings.enable_quick_add and disable_quickbuy != true -%}
+<div class="card__quick-add       {% if settings.card_atc_mobile == "text_button_bottom" %}mob:card__quick-add--below{% endif %}
+      {% if settings.card_atc_mobile == "icon" %}mob:card__quick-add--icon{% endif %}
+      {% if settings.card_atc_desktop == "text_button_bottom" %}desktop:card__quick-add--below{% endif %}
+      {% if settings.card_atc_desktop == "icon" %}desktop:card__quick-add--icon{% endif %}">
+  {%- assign product_form_id = 'quick-add-' | append: section_id | append: product.id -%}
+  <div class="no-js-hidden">
+    <div data-product="{{ product.id }}"
+      type="button"
+      class="rad_h6 preview_c btn btn--orange js-quick-add"
+      aria-haspopup="dialog"
+      data-product-url="{{ product.url }}"
+      data-product-default-variant="{{ product.has_only_default_variant }}"
+      {% if selected_color %}
+        data-selected-color="{{ selected_color }}"
+      {% endif %}
+    >
+      Build Your Package
+    </div>
+  </div>
+</div>
+{%- endif -%}
+            </div>
+          </div>
+        {% endif %}
+        <div
+          class="{% if block.settings.select_layout == 'pro-button' %}box_space{% endif %} media-with-text__text flex flex-col justify-center mie-auto cc-animate-init cc-animate-in"
+          data-cc-animate=""
+        >
+          <div class="text-start">
+            {% if block.settings.title != blank %}
+              <div class="section__header items-center flex flex-col text-center gap-x-theme">
+                <h2 class="rad_24 h4 section__heading mb-0 flex-auto text-left">{{ block.settings.title }}</h2>
+              </div>
+            {% endif %}
+            {% if block.settings.content != blank %}
+              {{ block.settings.content }}
+            {% endif %}
+            {% if block.settings.select_layout == 'pro-button' %}
+              <div class="rad_h6 btn_price">Starting at {{ product.price | money }}</div>
+            {% endif %}
+            {% if block.settings.enable_lear_nmore != blank %}
+              {% assign url = product.metafields.colibri.membership_page.value.url %}
+              {% if url == blank %}
+                {% assign url = product.url | within:collection %}
+              {% endif %}
+              <a href="{{ url }}" class="rad_h6 orange_link">Learn More</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+{% endfor %}

@@ -1,0 +1,37 @@
+{%- if settings.enable_quick_add and disable_quickbuy != true -%}
+  <div
+    class="
+      card__quick-add
+      {% if settings.card_atc_mobile == "text_button_bottom" %}mob:card__quick-add--below{% endif %}
+      {% if settings.card_atc_mobile == "icon" %}mob:card__quick-add--icon{% endif %}
+      {% if settings.card_atc_desktop == "text_button_bottom" %}desktop:card__quick-add--below{% endif %}
+      {% if settings.card_atc_desktop == "icon" %}desktop:card__quick-add--icon{% endif %}
+    "
+  >
+    {%- assign product_form_id = 'quick-add-' | append: section_id | append: product.id -%}
+      <div class="no-js-hidden">
+        <div data-product="{{ product.id }}"
+          type="button"
+          class="rad_h6 preview_c btn btn--orange js-quick-add"
+          aria-haspopup="dialog"
+          data-product-url="{{ product_url }}"
+          data-product-default-variant="{{ product.has_only_default_variant }}"
+          {% if selected_color %}
+            data-selected-color="{{ selected_color }}"
+          {% endif %}
+          {% if added_variant_id != blank %}
+          data-added-variant="{{ added_variant_id }}"
+          {% endif %}
+        >
+          Quick View
+          {% comment %}
+          {% if button_label != blank %}
+            {{ button_label }}
+          {% else %}
+          Preview {% if template contains "bundle" or template contains "package" %}package{% elsif product.template_suffix contains 'membership-product' %}Membership{% else %}course{% endif %}
+          {% endif %}
+          {% endcomment %}
+        </div>
+      </div>
+  </div>
+{%- endif -%}

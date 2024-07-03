@@ -1,0 +1,113 @@
+<quick-add-drawer
+  class="drawer quick-add-drawer{% if settings.quick_add_sticky_buttons %} overflow-hidden{% endif %} fixed top-0 right-0 flex flex-col w-full has-motion js-product"
+  data-name="quickbuy"
+  role="dialog"
+  tabindex="-1"
+  aria-labelledby="quick-add-heading"
+  aria-modal="true"
+  aria-hidden="true"
+>
+  <header class="pad_l_r line_height drawer__header flex justify-between items-center">
+    <h2 class="h5 mb-0">Quick View</h2>
+    <div class="flex items-center gap-x-theme">
+      <button type="button" class="drawer__close-btn js-close-drawer">
+        <span class="visually-hidden">Close</span>
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="1.5"
+          fill="none"
+          fill-rule="evenodd"
+          stroke-linejoin="round"
+          aria-hidden="true"
+          focusable="false"
+          role="presentation"
+          class="icon"
+        >
+          <path d="M5 19 19 5M5 5l14 14"></path>
+        </svg>
+      </button>
+    </div>
+  </header>
+  <div class="course-drawer__content drawer__content drawer__content--flex quick-add__content flex-auto items-center">
+    <product-form class="drawer-product-form top_pro"></product-form>
+    <script type="application/json" id="custom-product-json"></script>
+    {% comment %}
+    {% assign products = "" %}
+    {%- for product in collection.products -%}
+      {% if products != ""  %}
+        {% assign products = products | append: ","  %}
+      {% endif %}
+     {% assign products = products | append: product.handle  %}
+    {%- endfor -%}
+    
+    {%- for item in cart.items -%}
+      {% if products != ""  %}
+        {% assign products = products | append: ","  %}
+      {% endif %}
+     {% assign products = products | append: item.product.handle  %}
+    {%- endfor -%}
+    
+    {%- for product in recommendations.products -%}
+      {% if products != ""  %}
+        {% assign products = products | append: ","  %}
+      {% endif %}
+     {% assign products = products | append: product.handle  %}
+    {%- endfor -%}
+    {% assign products = products | split: "," | uniq %}
+    <script type="application/json" id="custom-product-json">
+      {
+        {%- for item in products -%}
+          {%- assign product = all_products[item] -%}
+          {%- if forloop.last -%}{%- assign is_last = true -%}{%- endif -%}
+          {%- for variant in product.variants -%}
+          "{{- variant.id -}}": {
+            "name": "{{- product.title -}}",
+            "profession" : {%- if product.metafields.colibri.profession != blank -%}{{- product.metafields.colibri.profession -}}{%- else -%}{}{%- endif -%},
+            "bundle_hours" : {%- if variant.metafields.colibri.bundle_hours != blank -%}{{- variant.metafields.colibri.bundle_hours -}}{%- else -%}{}{%- endif -%},
+            "current_collection": "{{- collection.handle -}}",
+            "extension_duration": "{%- if variant.metafields.colibri.webinar_course_hours -%}{{- variant.metafields.colibri.extension_duration -}}{%- endif -%}",
+            "contact_hours": "{{- variant.metafields.colibri.contact_hours -}}",
+            "delivery_method": "{{- variant.metafields.colibri.delivery_method -}}"
+          }{%- unless is_last == true and forloop.last -%},{%- endunless -%}
+          {%- endfor -%}
+        {%- endfor -%}
+      }
+    </script>
+    {% endcomment %}
+  </div>
+  <footer>
+    {% for block in section.blocks %}
+      {% if block.type == 'membership-box' %}
+        {% assign b_product = all_products[block.settings.member_product] %}
+        {% if b_product != blank %}
+          <div class="bottom_pro" style="display:none;">
+            {% if section.settings.bottom_txt != blank %}
+              <div class="bg_color">
+                <div class="pad_l_r bottom_heading">{{ section.settings.bottom_txt }}</div>
+              </div>
+            {% endif %}
+            <div class="pad_l_r box_pro">
+              <h2 class="rad_24 pro_heading h4 section__heading mb-0 flex-auto text-left">
+                {{ b_product.title }}
+              </h2>
+              <div class="price_box">
+                {% if block.settings.m_text != blank %}
+                  <p class="rad_h6 h6 sub-heading-font mb-0 flex-auto text-center">{{ block.settings.m_text }}</p>
+                {% endif %}
+                <div class="product-info__block_member">
+                  {% render 'price', product: b_product, use_variant: true %}
+                  {% assign button_label = "Quick View" %}
+                  {% assign product_url = b_product.url | within:collection %}
+                  {% render 'preview-course-button', settings: settings, product: product, product_url:product_url, section_id: section.id, product_not_for_sale: false, button_label:button_label  %}
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+  </footer>
+</quick-add-drawer>

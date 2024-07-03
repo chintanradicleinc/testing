@@ -1,0 +1,372 @@
+{{ 'text-overlay.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign color_scheme = section.settings.color_scheme
+  assign bg_color = false
+
+  if color_scheme == '1'
+    assign bg_color = settings.color_scheme_1_bg
+  elsif color_scheme == '2'
+    assign bg_color = settings.color_scheme_2_bg
+  elsif color_scheme == '3'
+    assign bg_color = settings.color_scheme_3_bg
+  endif
+
+  if bg_color == settings.bg_color or bg_color == 'rgba(0,0,0,0)'
+    assign bg_color = false
+  endif
+-%}
+
+{%- unless section.settings.full_width -%}
+  <div class="container">
+{%- endunless -%}
+
+ <style>
+.author-container{
+  display: flex;
+  background-color: #f6f6f6;
+  padding: 3rem;
+  margin-top: 5rem;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  column-gap: 2rem;
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+  line-height: 1.5;
+  border-radius: 0.2rem;
+}
+img{
+    max-width: 100%;
+    height: auto;
+}
+.author-container span{
+    font-style: italic;
+}
+.author-container h4{
+    margin-bottom: 0;
+}
+h2{
+  font-weight: bold;
+}
+.author-container .img{
+  width: 40%;
+}
+.author-body{
+  width: 60%;
+  line-height: 1.8;
+}
+.author-body h2{
+  margin: 0;
+}
+@media only screen and (max-width: 768px) {
+    .author-container{
+        flex-direction: column;
+    }
+  }
+</style>   
+    
+<div class="section{% unless bg_color == false %} section--padded{% if section.settings.full_width %} section--full-width{% endif %}{% endunless %}{% unless color_scheme == 'none' %} color-scheme color-scheme--{{ color_scheme }}{% endunless %}{% if bg_color == false %} color-scheme--transparent{% endif %}" id="{{ section.id }}"{% if settings.animations_enabled != "disabled" and section.settings.prevent_animation == false %} data-cc-animate{% endif %}>
+  <div class="container flex {{ section.settings.text_position }} {{ section.settings.text_align }}{% if section.settings.mob_center_text %} md-down:text-center{% endif %}">
+    <div class="max-w-text-overlay">
+      {%- for block in section.blocks -%}
+        {%- case block.type -%}
+
+          {%- when 'text' -%}
+
+          <div class="author-container">
+              <div class="author-body">
+                
+              <div class="section__block reading-width--inline md-down:px-gutter rte{% if section.settings.text_align == 'text-start' %} mr-auto{% elsif section.settings.text_align == 'text-end' %} ml-auto{% else %} mx-auto{% endif %}{% if block.settings.enlarge_text %} enlarge-text{% endif %}" {{ block.shopify_attributes }}>
+                
+                <div class="heading text_label_requirements">
+                  <a href="/pages/ce-requirements/{{ block.settings.text_label | replace: ' ','-' | downcase }}"> {{ block.settings.text_label }}</a>
+                </div>  
+                
+                <div class="hours_needed text_requirements">
+                  {{ block.settings.hours_needed }}
+                </div> 
+
+                 <div class="deadline text_requirements">
+                  {{ block.settings.deadline }}
+                </div> 
+
+                 <div class="home_study_limit text_requirements">
+                  {{ block.settings.home_study_limit }}
+                </div> 
+
+                 <div class="additonal_requirements text_requirements">
+                  {{ block.settings.additional_information }}
+                </div> 
+
+                 <div class="association_website text_requirements">
+                  {{ block.settings.board_assosciation_website }}
+                </div> 
+                
+                </div>
+              </div>
+          </div>
+
+          {%- when 'button' -%}
+            {%- if block.settings.button_1_label != blank or block.settings.button_2_label != blank -%}
+              <div class="section__block section__block--buttons md-down:px-gutter inline-flex flex-wrap {% if section.settings.text_align == 'text-start' %} justify-start{% elsif section.settings.text_align == 'text-end' %} justify-end{% else %} justify-center{% endif %}{% if section.settings.mob_center_text %} md-down:center{% endif %}" {{ block.shopify_attributes }}>
+                {%- if block.settings.button_1_label != blank %}
+                  <a class="btn {{ block.settings.button_1_style }}" {% if block.settings.button_1_link == blank %}role="link" aria-disabled="true"{% else %}href="{{ block.settings.button_1_link }}"{% endif %}>
+                    {{- block.settings.button_1_label | escape -}}
+                  </a>
+                {%- endif -%}
+                {%- if block.settings.button_2_label != blank %}
+                  <a class="btn {{ block.settings.button_2_style }}" {% if block.settings.button_2_link == blank %}role="link" aria-disabled="true"{% else %}href="{{ block.settings.button_2_link }}"{% endif %}>
+                    {{- block.settings.button_2_label | escape -}}
+                  </a>
+                {%- endif -%}
+              </div>
+            {%- endif -%}
+        {%- endcase -%}
+      {%- endfor -%}
+    </div>
+  </div>
+</div>
+
+{%- unless section.settings.full_width -%}
+  </div>
+{%- endunless -%}
+
+{% schema %}
+{
+  "name": "CE Requirements",
+  "class": "cc-rich-text",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "text_position",
+      "label": "Text position",
+      "options": [
+        {
+          "value": "justify-start",
+          "label": "Left"
+        },
+        {
+          "value": "justify-center",
+          "label": "Center"
+        },
+        {
+          "value": "justify-end",
+          "label": "Right"
+        }
+      ],
+      "default": "justify-center"
+    },
+    {
+      "type": "select",
+      "id": "text_align",
+      "label": "Text alignment",
+      "options": [
+        {
+          "value": "text-start",
+          "label": "Left"
+        },
+        {
+          "value": "text-center",
+          "label": "Center"
+        },
+        {
+          "value": "text-end",
+          "label": "Right"
+        }
+      ],
+      "default": "text-center"
+    },
+    {
+      "type": "checkbox",
+      "id": "mob_center_text",
+      "label": "Center text on mobile",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Style"
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "options": [
+        {
+          "value": "none",
+          "label": "Default"
+        },
+        {
+          "value": "1",
+          "label": "Scheme 1"
+        },
+        {
+          "value": "2",
+          "label": "Scheme 2"
+        },
+        {
+          "value": "3",
+          "label": "Scheme 3"
+        }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "label": "Make section background full width",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "SEO"
+    },
+    {
+      "type": "checkbox",
+      "id": "prevent_animation",
+      "label": "Load the section without animation",
+      "info": "If this section is visible when the page loads, enabling this setting can reduce CLS and may improve site speed scores. [Read more](https://cleancanvas.co.uk/support/enterprise/performance-guide)",
+      "default": false
+    }
+  ],
+  "blocks": [
+    {
+      "type": "text",
+      "name": "Text",
+      "limit": 10,
+      "settings": [
+        {
+          "type": "text",
+          "id": "text_label",
+          "label": "Write label"
+        },
+        {
+          "type": "richtext",
+          "id": "hours_needed",
+          "label": "Text",
+          "default": "<p>Hours Needed</p>"
+        },
+         {
+          "type": "richtext",
+          "id": "deadline",
+          "label": "Text",
+          "default": "<p>Deadline:</p>"
+        },
+         {
+          "type": "richtext",
+          "id": "home_study_limit",
+          "label": "Text",
+          "default": "<p>Home Study Limit: </p>"
+        },
+         {
+          "type": "richtext",
+          "id": "additional_information",
+          "label": "Text",
+          "default": "<p>Additional Information:</p>"
+        },
+        {
+          "type": "richtext",
+          "id": "board_assosciation_website",
+          "label": "Text",
+          "default": "<p>Board/Association Website:</p>"
+        },
+        {
+          "type": "checkbox",
+          "id": "enlarge_text",
+          "label": "Enlarge text",
+          "default": true
+        }
+      ]
+    },
+    {
+      "type": "button",
+      "name": "Button",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "button_1_label",
+          "label": "Button 1 label",
+          "default": "Optional button"
+        },
+        {
+          "type": "url",
+          "id": "button_1_link",
+          "label": "Button 1 link"
+        },
+        {
+          "type": "select",
+          "id": "button_1_style",
+          "label": "Button 1 style",
+          "options": [
+            {
+              "value": "link",
+              "label": "Link"
+            },
+            {
+              "value": "btn--primary",
+              "label": "Primary button"
+            },
+            {
+              "value": "btn--secondary",
+              "label": "Secondary button"
+            }
+          ],
+          "default": "btn--primary"
+        },
+        {
+          "type": "text",
+          "id": "button_2_label",
+          "label": "Button 2 label",
+          "default": "Optional button"
+        },
+        {
+          "type": "url",
+          "id": "button_2_link",
+          "label": "Button 2 link"
+        },
+        {
+          "type": "select",
+          "id": "button_2_style",
+          "label": "Button 2 style",
+          "options": [
+            {
+              "value": "link",
+              "label": "Link"
+            },
+            {
+              "value": "btn btn--primary",
+              "label": "Primary button"
+            },
+            {
+              "value": "btn btn--secondary",
+              "label": "Secondary button"
+            }
+          ],
+          "default": "btn btn--primary"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "CE Requirements",
+      "blocks": [
+        {
+          "type": "text"
+        }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": [
+      "header",
+      "footer",
+      "aside"
+    ]
+  }
+}
+{% endschema %}

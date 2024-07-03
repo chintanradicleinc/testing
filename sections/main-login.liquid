@@ -1,0 +1,137 @@
+<div class="container">
+  <div id="login">
+    <div class="section__header items-center flex flex-col text-center gap-x-theme">
+      <div class="section__header items-center flex flex-col text-center gap-x-theme">
+        <h2 class="rad_h2 h4 section__heading mb-0 flex-auto text-center">
+          Welcome Back! Login to your HomeCEU Account
+        </h2>
+      </div>
+      {% if section.blocks.size > 0 %}
+      <div class="login_list">
+        <div class="f_icon">
+          <select id="login_select" name="login_select" class="common_select first_select rad_h6">
+            {% for block in section.blocks %}
+              {% if block.settings.text != blank %}
+                <option value="{{ block.settings.text | handleize }}" {% if forloop.first %}selected=""{% endif %}>{{ block.settings.text }}</option>
+              {% endif %}  
+            {% endfor %}
+          </select>
+          <svg aria-hidden="true" focusable="false" class="icon icon-caret" viewBox="0 0 10 6">
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M9.354.646a.5.5 0 00-.708 0L5 4.293 1.354.646a.5.5 0 00-.708.708l4 4a.5.5 0 00.708 0l4-4a.5.5 0 000-.708z" fill="currentColor">
+            </path>
+          </svg>
+        </div>
+        {% assign dis_menu = section.settings.dis_menu %}
+        {% if dis_menu != blank %}
+        <div id="sec_main" class="f_icon" style="display: none;">
+          <select id="choose_disc" name="iOperation" class="common_select secnd_select rad_h6">
+            <option value="" selected="">Choose Discipline</option>
+            {% for link in dis_menu.links -%}
+              <option value="{{ link.url }}">{{ link.title }}</option>
+            {% endfor %}  
+          </select>
+          <svg aria-hidden="true" focusable="false" class="icon icon-caret" viewBox="0 0 10 6">
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M9.354.646a.5.5 0 00-.708 0L5 4.293 1.354.646a.5.5 0 00-.708.708l4 4a.5.5 0 00.708 0l4-4a.5.5 0 000-.708z" fill="currentColor">
+            </path>
+          </svg>
+        </div>
+        <button id="login_button" class="btn--orange btn--purple" style="display: none;" disabled="">Login</button>
+        {% endif %}
+      </div>
+        {% endif %}
+    </div>    
+  </div>
+  </div>
+
+<script type="text/javascript">
+  document.addEventListener("DOMContentLoaded", function () {
+
+  // Function to enable/disable the login button based on the selected option in choose_disc dropdown
+  function updateLoginButton() {
+      var selectedValue = document.getElementById("choose_disc").value;
+      var loginButton = document.getElementById("login_button");
+      loginButton.disabled = selectedValue === ""; // Disable the button if no option is selected
+  }
+
+  // Event listener for changes in login_select dropdown
+  document.getElementById("login_select").addEventListener("change", function() {
+    var selectedValue = this.value;
+    console.log(this);
+    var chooseDiscDropdown = document.getElementById("sec_main");
+    var loginButton = document.getElementById("login_button");
+
+    if (selectedValue === "membership") {
+        chooseDiscDropdown.style.display = "flex"; // Display the dropdown
+        loginButton.style.display = "block";
+    } else {
+        chooseDiscDropdown.style.display = "none"; // Hide the dropdown
+        loginButton.style.display = "none";
+        document.getElementById("choose_disc").selectedIndex = 0;
+       updateLoginButton();
+    }
+
+    // Additional functionality for "course-or-package"
+    if (selectedValue === "course-or-package") {
+        var url = "https://lms.ceu360.com/login";
+        window.open(url, "_blank");
+    }
+  });
+
+  // Event listener for changes in choose_disc dropdown
+  document.getElementById("choose_disc").addEventListener("change", function() {
+    console.log("heree 80");
+      // Enable/disable login button based on selected option
+      updateLoginButton();
+  });
+
+  // Event listener for login button click
+  document.getElementById("login_button").addEventListener("click", function() {
+      var selectedValue = document.getElementById("choose_disc").value;
+      if (selectedValue !== "") {
+          // Open the URL in a new tab
+          window.open(selectedValue, "_blank");
+      }
+  });
+
+  // Call the function to initially set the state of the login button
+  updateLoginButton();
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Login",
+  "class": "cc-main-login section section--template",
+  "settings":[
+    {
+      "type": "header",
+      "content": "Section header"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Welcome Back! Login to your HomeCEU Account"
+    },
+    {
+       "type": "link_list",
+       "id": "dis_menu",
+       "label": "Disclipline Menu"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "option",
+      "name": "Add Option",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "Text"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

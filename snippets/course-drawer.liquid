@@ -1,0 +1,263 @@
+{% if collection != blank %}
+  <course-drawer
+    data-c_id="{{ product.id }}"
+    class="custom_crourse_d quick-add-drawer drawer drawer--course drawer--cart fixed top-0 right-0 flex flex-col w-full has-motion"
+    data-name="course-drawer"
+    id="course-drawer"
+    role="dialog"
+    aria-label="Your cart"
+    aria-modal="true"
+    aria-hidden="false"
+    tabindex="-1"
+    data-shipping-calculator="false"
+  >
+    <header class="pad_l_r line_height drawer__header flex justify-between items-center">
+      <h2 class="h5 mb-0">Quick View</h2>
+      <div class="flex items-center gap-x-theme">
+        <button type="button" class="drawer__close-btn js-close-drawer">
+          <span class="visually-hidden">Close</span>
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="1.5"
+            fill="none"
+            fill-rule="evenodd"
+            stroke-linejoin="round"
+            aria-hidden="true"
+            focusable="false"
+            role="presentation"
+            class="icon"
+          >
+            <path d="M5 19 19 5M5 5l14 14"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+    <div class="course-drawer__content drawer__content drawer__content--flex flex-auto items-center">
+      <product-form>
+        {%- for product in collection.products -%}
+          <div
+            class="pad_l_r top_pro grow flex items-center js-product {% unless forloop.first %}hidden{% endunless %}"
+            data-pid="{{ product.id }}"
+          >
+              <h2 class="h4 section__heading mb-0 flex-auto text-left align-self-start">
+                {{ product.title }}
+              </h2>
+              <hr class="course_hr">
+              <div class="c_info align-self-start">
+                <div class="hours_review">
+                  <span class="pro_hours">
+                    {% if product.metafields.colibri.contact_hours != blank
+                      and product.metafields.colibri.course_format != blank
+                    -%}
+                      {{- product.metafields.colibri.contact_hours }} Hours
+                    {%- endif -%}
+                  </span>
+                  <span class="card_star"
+                    >★★★★★
+                    <div class="star_num">(2)</div>
+                  </span>
+                  {% if product.metafields.colibri.instructional_level != blank %}
+                    <span class="ins">Instructional Level: {{ product.metafields.colibri.instructional_level }}</span>
+                  {% endif %}
+                </div>
+                <div class="icon_txt"><img src="{{ 'pro_icon.png' | asset_url }}" /><span>Text</span></div>
+              </div>
+              <div class="c_acc_cart product-info__block_member">
+                {% form 'product', product, class: 'js-product-form js-product-form-main'%}
+                <input type="hidden" name="iFunction_2" value="{{ collection.metafields.colibri.state }}" />
+                <input type="hidden" name="iOperation_2" value="{{ collection.metafields.colibri.discipline | downcase }}" />
+                <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}" />
+                  {% comment %}
+                <div class="flex">
+                  {% render 'variant-picker',
+                    product: product,
+                    product_form_id: product_form_id,
+                    block: block,
+                    media_ratio: media_ratio,
+                    swatch_crop: section.settings.media_crop
+                  %}
+                </div>
+                  {% endcomment %}
+                <div class="bundle-flex">
+                  {%- render 'price', product: product, class: 'price--top' -%}
+                  <div class="product_cart_add">
+                   {% if product.template_suffix contains "package-products" %}
+                      <a href="{{ product.url }}" class="prod-btn">Choose Options</a> 
+                     {% else %}
+                        <button type="submit" aria-disabled="false" name="add" class="prod-btn">Add to Cart</button> 
+                    {% endif %} 
+                  </div>
+                </div>
+                {% endform %}
+              </div>
+            {% if product.description != blank %}
+                <div class="rte c_description">
+                  <a href="{{ product.url | within: collection }}">
+                    <span class="orange_txt">Full Course Description</span>
+                  </a>
+                  <div class="inn_desc">
+                    {{ product.description | truncatewords: 75 }}
+                  </div>
+                </div>
+              {% endif %}
+          </div>
+        {%- endfor -%}
+      </product-form>
+      <script type="application/json" id="custom-product-json">
+        {
+          {%- for product in collection.products -%}
+          {%- assign variant = product.selected_or_first_available_variant -%}
+          "{{- variant.id -}}": {
+            "profession" : {% if product.metafields.colibri.profession != blank %}{{- product.metafields.colibri.profession -}}{% else %}{}{% endif %},
+            "bundle_hours" : {% if variant.metafields.colibri.bundle_hours != blank %}{{- variant.metafields.colibri.bundle_hours -}}{% else %}{}{% endif %},
+            "current_collection": "{{ collection.handle }}",
+            "extension_duration": "{% if variant.metafields.colibri.webinar_course_hours %}{{- variant.metafields.colibri.extension_duration -}}{% endif %}",
+            "contact_hours": "{{- variant.metafields.colibri.contact_hours -}}",
+            "delivery_method": "{{- variant.metafields.colibri.delivery_method -}}"
+          }{% unless forloop.last %},{% endunless %}
+          {%- endfor -%}
+        }
+      </script>
+      {% for block in section.blocks %}
+        {% if block.type == 'membership-box' %}
+          {% assign b_product = all_products[block.settings.member_product] %}
+          {% if b_product != blank %}
+            <div class="bottom_pro">
+              {% if section.settings.bottom_txt != blank %}
+                <div class="bg_color">
+                  <div class="pad_l_r bottom_heading">{{ section.settings.bottom_txt }}</div>
+                </div>
+              {% endif %}
+              <div class="pad_l_r box_pro">
+                <h2 class="rad_24 pro_heading h4 section__heading mb-0 flex-auto text-left">
+                  {{ b_product.title }}
+                </h2>
+                <div class="price_box">
+                  {% if block.settings.m_text != blank %}
+                    <p class="rad_h6 h6 sub-heading-font mb-0 flex-auto text-center">{{ block.settings.m_text }}</p>
+                  {% endif %}
+
+                  <div class="product-info__block_member">
+                    {% render 'price', product: b_product, use_variant: true %}
+               {% if b_product.template_suffix contains "package-products" %}
+                  <a href="{{ b_product.url }}" type="submit" class="prod-btn">Choose Options</a> 
+                 {% else %}
+                  {% form 'product', b_product %}
+                    <select name="id" style="display: none">
+                      {% for variant in b_product.variants %}
+                        <option value="{{ variant.id }}"></option>
+                      {% endfor %}
+                    </select>
+                    <button type="submit" class="prod-btn">Add to Cart</button> 
+                  {% endform %}
+                {% endif %} 
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+    </div>
+    <div class="course-drawer__summary relative drawer__footer course-drawer--checkout--sticky-true"></div>
+    <div class="overlay overlay--drawer absolute top-0 right-0 bottom-0 left-0 js-close"></div>
+  </course-drawer>
+{% else %}
+  <course-drawer
+    data-c_id="{{ product.id }}"
+    class="drawer drawer--course drawer--cart fixed top-0 right-0 flex flex-col w-full has-motion"
+    data-name="course-drawer"
+    id="course-drawer"
+    role="dialog"
+    aria-label="Your cart"
+    aria-modal="true"
+    aria-hidden="false"
+    tabindex="-1"
+    data-shipping-calculator="false"
+  >
+    <header class="pad_l_r line_height drawer__header flex justify-between items-center">
+      <h2 class="h5 mb-0">Quick View</h2>
+      <div class="flex items-center gap-x-theme">
+        <button type="button" class="drawer__close-btn js-close-drawer">
+          <span class="visually-hidden">Close</span>
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="1.5"
+            fill="none"
+            fill-rule="evenodd"
+            stroke-linejoin="round"
+            aria-hidden="true"
+            focusable="false"
+            role="presentation"
+            class="icon"
+          >
+            <path d="M5 19 19 5M5 5l14 14"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+    <div class="course-drawer__content drawer__content drawer__content--flex flex-auto items-center">
+      <div
+        class="pad_l_r top_pro grow flex items-center {% unless forloop.first %}hidden{% endunless %}"
+        data-pid="{{ product.id }}"
+      >
+        <h2 class="h4 section__heading mb-0 flex-auto text-left align-self-start">
+          {{ product.title }}
+        </h2>
+        <hr class="course_hr">
+        <div class="c_info align-self-start">
+          <div class="hours_review">
+            <span class="pro_hours">
+              {% if product.metafields.colibri.contact_hours != blank
+                and product.metafields.colibri.course_format != blank
+              -%}
+                {{- product.metafields.colibri.contact_hours }} Hours
+              {%- endif -%}
+            </span>
+            <span class="card_star"
+              >★★★★★
+              <div class="star_num">(2)</div>
+            </span>
+            {% if product.metafields.colibri.instructional_level != blank %}
+              <span class="ins">Instructional Level: {{ product.metafields.colibri.instructional_level }}</span>
+            {% endif %}
+          </div>
+          <div class="icon_txt">
+            <img src="{{ 'pro_icon.png' | asset_url }}" alt="product icon" /><span>Text</span>
+          </div>
+        </div>
+        <div class="c_acc_cart product-info__block_member">
+          {%- render 'price', product: product, class: 'price--top' -%}
+          <product-form class="product_cart_add">
+            {% form 'product', product %}
+              <select name="id" style="display: none">
+                {% for variant in product.variants %}
+                  <option value="{{ variant.id }}"></option>
+                {% endfor %}
+              </select>
+              <button type="submit" class="prod-btn">Add to Cart</button>
+            {% endform %}
+          </product-form>
+        </div>
+        {% if product.description != blank %}
+          <div class="rte c_description">
+            <a href="{{ product.url }}">
+              <span class="orange_txt">Full Course Description</span>
+            </a>
+            <div class="inn_desc">
+              {{ product.description | truncatewords: 75 }}
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+    <div class="course-drawer__summary relative drawer__footer course-drawer--checkout--sticky-true"></div>
+    <div class="overlay overlay--drawer absolute top-0 right-0 bottom-0 left-0 js-close"></div>
+  </course-drawer>
+{% endif %}

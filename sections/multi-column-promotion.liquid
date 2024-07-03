@@ -1,0 +1,802 @@
+{%- comment -%}theme-check-disable LiquidTag{%- endcomment -%}
+{%- if section.blocks.size > 0 -%}
+  {%- liquid
+    # constants
+    assign breakpoint_sm = 600
+    assign breakpoint_md = 769
+    assign breakpoint_lg = 1024
+
+    if section.settings.layout == 'carousel'
+      assign carousel = true
+      if section.settings.column_size == 'small'
+        assign grid_classes = 'grid-flow-col auto-cols-1 sm:auto-cols-2 md:auto-cols-3 lg:auto-cols-4 '
+      elsif section.settings.column_size == 'medium'
+        assign grid_classes = 'grid-flow-col auto-cols-1 md:auto-cols-2 lg:auto-cols-3'
+      else
+        assign grid_classes = 'grid-flow-col auto-cols-1 md:auto-cols-2'
+      endif
+
+    else
+      assign carousel = false
+    endif
+
+    assign color_scheme = section.settings.color_scheme
+
+    if section.settings.image_ratio == 'shortest'
+      assign image_ratio = 0
+      for block in section.blocks
+        assign this_image_ratio = block.settings.image.aspect_ratio | default: 1.77
+        if this_image_ratio > image_ratio
+          assign image_ratio = this_image_ratio
+        endif
+      endfor
+    elsif section.settings.image_ratio == 'tallest'
+      assign image_ratio = 99
+      for block in section.blocks
+        assign this_image_ratio = block.settings.image.aspect_ratio | default: 1.77
+        if this_image_ratio < image_ratio
+          assign image_ratio = this_image_ratio
+        endif
+      endfor
+    else
+      assign image_ratio = section.settings.image_ratio
+    endif
+  -%}
+  {%- if carousel == false -%}
+    {% style %}
+      {% if section.settings.column_size == 'small' %}
+        @media (min-width: {{ breakpoint_sm }}px) {
+          #{{ section.id }} .multi-column {
+            width: calc(50% - var(--column-gap));
+          }
+        }
+        @media (min-width: {{ breakpoint_md }}px) {
+          #{{ section.id }} .multi-column {
+            width: calc((100% / 3) - var(--column-gap));
+          }
+        }
+        @media (min-width: {{ breakpoint_lg }}px) {
+          #{{ section.id }} .multi-column {
+            width: calc(25% - var(--column-gap));
+          }
+        }
+      {% else %}
+        @media (min-width: {{ breakpoint_md }}px) {
+          #{{ section.id }} .multi-column {
+            width: calc(50% - var(--column-gap));
+          }
+        }
+        {% if section.settings.column_size == 'medium' %}
+          @media (min-width: {{ breakpoint_lg }}px) {
+            #{{ section.id }} .multi-column {
+              width: calc((100% / 3) - var(--column-gap));
+            }
+          }
+        {% endif %}
+      {% endif %}
+    {% endstyle %}
+  {%- endif -%}
+
+  <div class="section multi-columns-promotion" id="{{ section.id }}">
+    {%- if section.settings.title != blank or section.settings.button_label != blank -%}
+      <div class="container">
+        <div
+          class="section__header items-center flex{% if section.settings.heading_align == 'text-center' %} flex-col text-center{% elsif section.settings.heading_align == 'text-end' %} flex-row-reverse flex-wrap{% else %} flex-row flex-wrap{% endif %} gap-x-theme"
+          {% if settings.animations_enabled != 'disabled' %}
+            data-cc-animate
+          {% endif %}
+        >
+          {%- if section.settings.title != blank -%}
+            <h2 class="rad_h2 main_heading h4 section__heading mb-0 flex-auto {{ section.settings.heading_align }}">
+              {{- section.settings.title | escape -}}
+            </h2>
+          {%- endif -%}
+
+          {%- if section.settings.subtitle != blank -%}
+            <p class="rad_h6 mb-0 flex-auto {{ section.settings.heading_align }}">
+              {{- section.settings.subtitle | escape -}}
+            </p>
+          {%- endif -%}
+
+          {%- if section.settings.button_label != blank -%}
+            <a href="{{ section.settings.button_link }}" class="link">{{ section.settings.button_label | escape }}</a>
+          {%- endif -%}
+        </div>
+      </div>
+    {%- endif -%}
+
+    {%- if carousel -%}
+      <carousel-slider class="carousel block" inactive>
+        <div class="container relative">
+          <div class="slider" id="slider-{{ section.id }}">
+    {%- endif -%}
+
+    <div class="container">
+      <ul
+        class="{% if carousel %}slider__grid grid {{ grid_classes }}{% else %} flex flex-wrap{% endif %} gap-x-theme{% if color_scheme == 'none' and carousel == false %} gap-y-12 md:gap-y-6{% else %} gap-y-6{% endif %}"
+        role="list"
+      >
+        {%- for block in section.blocks -%}
+          {%- liquid
+            if section.settings.image_ratio == 'natural'
+              if block.settings.image != blank
+                assign image_ratio = block.settings.image.aspect_ratio
+              else
+                assign image_ratio = 1.77
+              endif
+            endif
+          -%}
+          <li
+            {% if section.settings.border_color != blank %}
+              style="border-color: {{ section.settings.border_color }};"
+            {% endif %}
+            class="multi-column multi-icon multi-promotion grow {{ block.settings.content_align }} w-full max-w-none{% if carousel %} slider__item{% endif %}"
+            {{ block.shopify_attributes -}}
+            {% if settings.animations_enabled != 'disabled' %}
+              data-cc-animate data-cc-animate-delay="{{ forloop.index | times: 0.07 }}s"
+            {% endif %}
+          >
+            <div class="card{% if block.settings.video_shopify != blank %} video-section{% endif %}{% unless color_scheme == 'none' %} color-scheme color-scheme--{{ color_scheme }}{% endunless %} relative flex flex-col h-full">
+              <div class="card__info flex flex-col flex-auto items-start pt-6{% if section.settings.column_align == 'center' %} text-center items-center{% endif %}">
+                {% if block.settings.product_badge != blank %}
+                  <label class="rad_h6 badge_label">{{ block.settings.product_badge }}</label>
+                {% endif %}
+
+                <div class="card_main">
+                  {%- if block.settings.enable_media -%}
+                    {%- liquid
+                      if section.settings.column_size == 'small'
+                        assign cols = 3
+                      else
+                        assign cols = 2
+                      endif
+                      capture sizes
+                        render 'sizes-attribute', grid: true, min: 1, md: cols
+                      endcapture
+                    -%}
+
+                    {%- if block.settings.image != blank or block.settings.video_shopify != blank -%}
+                      <div
+                        class="card__media media relative w-full{% if section.settings.image_ratio == "natural" %} {{ section.settings.media_align }}{% endif %}"
+                        style="{% unless section.settings.image_ratio == "natural" %}padding-top: {{ 1 | divided_by: image_ratio | times: 100 }}%;{% endunless %}{% if section.settings.image_ratio == "natural" and block.settings.video_shopify %}padding-top: 56.25%;{% endif %}{% if block.settings.media_scale < 100 %} transform: scale({{ block.settings.media_scale | divided_by: 100.0 }});{% endif %}"
+                      >
+                        {%- if block.settings.image != blank or block.settings.video_shopify != blank -%}
+                          {%- if block.settings.video_shopify != blank -%}
+                            <deferred-media class="media absolute top-0 left-0 w-full h-full">
+                              <template>
+                                <video-component
+                                  class="has-iframe absolute top-0 left-0 w-full h-full no-js-hidden"
+                                  data-autoplay="true"
+                                  data-background="true"
+                                >
+                                  {{
+                                    block.settings.video_shopify
+                                    | video_tag:
+                                      class: 'img-fit promo__mp4 pointer-events-none',
+                                      playsinline: true,
+                                      autoplay: true,
+                                      muted: true,
+                                      loop: true,
+                                      controls: false,
+                                      poster: ''
+                                    | replace: '<img ', '<img loading="lazy" hidden '
+                                  }}
+                                </video-component>
+                              </template>
+                            </deferred-media>
+                          {%- endif -%}
+
+                          {%- if block.settings.image != blank %}
+                            {%- liquid
+                              assign image_class = 'video-played-hidden'
+                              unless section.settings.image_ratio == 'natural'
+                                assign image_class = image_class | append: ' img-fit'
+                              endunless
+                              if section.settings.image_ratio == 'natural' and block.settings.video_shopify != blank
+                                assign image_class = image_class | append: ' img-fit'
+                              endif
+                            -%}
+                            {% render 'image',
+                              image: block.settings.image,
+                              widths: '460, 700, 860, 1296',
+                              src_width: 700,
+                              sizes: sizes,
+                              section_index: section.index,
+                              class: image_class
+                            %}
+                          {%- endif -%}
+                        {%- else -%}
+                          {%- liquid
+                            assign placeholder_class = 'media__placeholder'
+                            unless section.settings.image_ratio == 'natural'
+                              assign placeholder_class = placeholder_class | append: ' img-fit'
+                            endunless
+                          -%}
+                          {{- 'image' | placeholder_svg_tag: placeholder_class -}}
+                        {%- endif -%}
+                      </div>
+                    {%- endif -%}
+                  {%- endif -%}
+
+                  {%- if block.settings.heading != blank -%}
+                    <div class="heading_card flex flex-col">
+                      <h2 class="rad_h3 h4 section__heading flex-start">{{ block.settings.heading | escape }}</h2>
+                      {%- if block.settings.sub_heading != blank -%}
+                        <div class="rad_h5 card__rte flex-auto rte">
+                          {{ block.settings.sub_heading }}
+                        </div>
+                      {%- endif -%}
+
+                      {%- if block.settings.text != blank -%}
+                        <div class="rad_h6 card__rte flex-auto rte">
+                          {{ block.settings.text }}
+                        </div>
+                      {%- endif -%}
+                    </div>
+                  {%- endif -%}
+                </div>
+
+                {% if block.settings.product_select != blank %}
+                  {% assign product = all_products[block.settings.product_select] %}
+                  {%- if product != blank -%}
+                    <div class="card_product">
+                      <p class="rad_24 product-title-membership">{{ product.title }}</p>
+                      {%- if section.settings.subtitle_product != blank -%}
+                        <p class="rad_h6 h6 sub-heading-font mb-0 flex-auto {{ section.settings.heading_align }}">
+                          {{- section.settings.subtitle_product | escape -}}
+                        </p>
+                      {%- endif -%}
+                      {% if block.settings.product_duration != blank %}
+                        <p class="rad_h6 product_duration small">{{ block.settings.product_duration }}</p>
+                      {% endif %}
+                      {% render 'price', product: product, use_variant: true %}
+                      {% if block.settings.product_promo != blank %}
+                        <p class="rad_14 product_promo">{{ block.settings.product_promo }}</p>
+                      {% endif %}
+
+                      <product-form class="product_cart_add">
+                        {% assign product_form_id = 'product-form-' | append: product.id | append: section.id %}
+                        {% form 'product',
+                          product,
+                          class: 'js-product-form js-product-form-main',
+                          id: product_form_id
+                        %}
+                          <select name="id" style="display: none">
+                            {% for variant in product.variants %}
+                              <option value="{{ variant.id }}"></option>
+                            {% endfor %}
+                          </select>
+                          <input
+                            type="hidden"
+                            class="qty-input__input input"
+                            id="quantity-quickadd"
+                            name="quantity"
+                            value="1"
+                          >
+                          {% assign incart = false %}
+                          {% for item in cart.items %}
+                            {% if item.product.id == product.id %}
+                              {% assign incart = true %}
+                            {% endif %}
+                          {% endfor %}
+                          <button
+                            type="submit"
+                            data-add-to-cart-text="Add to cart"
+                            name="add"
+                            class="rad_h6 left-sidebar-prod-btn {% if incart == true %}btn--cyan dis_btn{% endif %}"
+                            data-product_id="{{ product.id }}"
+                          >
+                            {% if product.template_suffix contains 'package-products'
+                              or product.template_suffix contains 'pre-define-bundle'
+                            -%}
+                              Choose Options
+                            {%- else -%}
+                              {% if block.settings.product_label != blank -%}
+                                {{- block.settings.product_label -}}
+                              {% elsif incart == true %}
+                                In Cart
+                              {%- else -%}
+                                Add to cart
+                              {%- endif %}
+                            {%- endif %}
+                          </button>
+                          <input type="hidden" id="_education_type" name="properties[_education_type]" value="CE">
+                          <input type="hidden" id="_state" name="properties[_state]" value="alabama">
+                          <input type="hidden" id="_discipline" name="properties[_discipline]" value="pt">
+                        {% endform %}
+                      </product-form>
+
+                      <script type="application/json" id="custom-product-json">
+                        {
+                          {%- for variant in product.variants -%}
+                          "{{- variant.id -}}": {
+                            "profession" : {% if product.metafields.colibri.profession != blank %}{{- product.metafields.colibri.profession -}}{% else %}{}{% endif %},
+                            "bundle_hours" : {% if variant.metafields.colibri.bundle_hours != blank %}{{- variant.metafields.colibri.bundle_hours -}}{% else %}{}{% endif %},
+                            "current_collection": "{{ collection.handle }}",
+                            "extension_duration": "{% if variant.metafields.colibri.webinar_course_hours %}{{- variant.metafields.colibri.extension_duration -}}{% endif %}",
+                            "contact_hours": "{{- variant.metafields.colibri.contact_hours -}}",
+                            "delivery_method": "{{- variant.metafields.colibri.delivery_method -}}"
+                          }{% unless forloop.last %},{% endunless %}
+                          {%- endfor -%}
+                        }
+                      </script>
+                    </div>
+                  {%- endif -%}
+                {%- endif -%}
+                {% if block.settings.product_specs != blank %}
+                  <div class="product_specs">
+                    {{ block.settings.product_specs }}
+                  </div>
+                {% endif %}
+
+                {% if block.settings.button_link %}
+                  <div class="mt-8 text-center multi-promotion-button">
+                    <a
+                      class="rad_h6 card__button{% if block.settings.button_label == blank %}{% if section.settings.button_style == 'link' %} btn--primary{% else %} {{ section.settings.button_style }}{% endif %} btn btn--icon btn--lg has-ltr-icon{% else %} {{ section.settings.button_style }}{% endif %}"
+                      {% if block.settings.button_type == "ce-requirement" %}onclick="getRequirementData('','{{ block.settings.select_discipline }}','/pages/ce-requirements')"{% endif %}
+                      {% if block.settings.button_link != blank %}
+                        {% if block.settings.button_type == "ce-requirement" %}
+                          data-href="{{ block.settings.button_link }}"
+                        {% else %}
+                          href="{{ block.settings.button_link }}"
+                        {% endif %}
+                      {% else %}
+                        role="link" aria-disabled="true"
+                      {% endif %}
+                    >
+                      
+                      {%- if block.settings.button_label != blank -%}
+                        {{- block.settings.button_label | escape -}}
+                      {%- else -%}
+                        <span class="visually-hidden">
+                          {{- 'general.labels.please_select' | t -}}
+                          {%- if block.settings.heading != blank %} {{ block.settings.heading }}{% endif -%}
+                        </span>
+                        {%- render 'icon-arrow-right' -%}
+                      {%- endif -%}
+                    </a>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          </li>
+        {%- endfor -%}
+      </ul>
+    </div>
+
+    {%- if carousel -%}
+      </div>
+      {%- if settings.slider_show_arrows != 'never' -%}
+        <div class="slider-nav absolute top-middle end {% if settings.slider_show_arrows == 'hover' %}slider-nav--show-on-hover no-hover-hidden {% endif %}hidden md:block no-js-hidden">
+          <button
+            type="button"
+            class="slider-nav__btn tap-target btn {{ settings.slider_button_style }} has-ltr-icon"
+            name="next"
+            aria-controls="slider-{{ section.id }}"
+          >
+            <span class="visually-hidden">{{ 'general.slider.next' | t }}</span>
+            {% render 'icon-chevron-right' %}
+          </button>
+          <button
+            type="button"
+            class="slider-nav__btn tap-target btn {{ settings.slider_button_style }} has-ltr-icon"
+            name="prev"
+            aria-controls="slider-{{ section.id }}"
+          >
+            <span class="visually-hidden">{{ 'general.slider.previous' | t }}</span>
+            {% render 'icon-chevron-left' %}
+          </button>
+        </div>
+      {%- endif -%}
+      </div>
+      </carousel-slider>
+    {%- endif -%}
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Multi-column promotion",
+  "class": "cc-multi-column",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section header"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Multi-column"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Sub Heading",
+      "default": "Multi-column"
+    },
+    {
+      "type": "select",
+      "id": "heading_align",
+      "label": "Heading alignment",
+      "options": [
+        {
+          "value": "text-start",
+          "label": "Left"
+        },
+        {
+          "value": "text-center",
+          "label": "Center"
+        },
+        {
+          "value": "text-end",
+          "label": "Right"
+        }
+      ],
+      "default": "text-start"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "View more label"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "View more link"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "options": [
+        {
+          "value": "carousel",
+          "label": "Carousel"
+        },
+        {
+          "value": "grid",
+          "label": "Grid"
+        }
+      ],
+      "default": "carousel"
+    },
+    {
+      "type": "select",
+      "id": "column_size",
+      "label": "Column size",
+      "options": [
+        {
+          "value": "small",
+          "label": "Small"
+        },
+        {
+          "value": "medium",
+          "label": "Medium"
+        },
+        {
+          "value": "large",
+          "label": "Large"
+        }
+      ],
+      "default": "medium"
+    },
+    {
+      "type": "select",
+      "id": "column_align",
+      "label": "Content alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "media_align",
+      "label": "Media alignment",
+      "info": "Applies to small images with a \"Natural\" aspect ratio.",
+      "options": [
+        {
+          "value": "text-left",
+          "label": "Left"
+        },
+        {
+          "value": "text-center",
+          "label": "Center"
+        }
+      ],
+      "default": "text-center"
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "Media aspect ratio",
+      "options": [
+        {
+          "value": "natural",
+          "label": "Natural"
+        },
+        {
+          "value": "shortest",
+          "label": "Height of shortest image"
+        },
+        {
+          "value": "tallest",
+          "label": "Height of tallest image"
+        },
+        {
+          "value": "1.77",
+          "label": "Landscape"
+        },
+        {
+          "value": "1",
+          "label": "Square"
+        },
+        {
+          "value": "0.75",
+          "label": "Portrait"
+        }
+      ],
+      "default": "1"
+    },
+    {
+      "type": "header",
+      "content": "Style"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border Color",
+      "default": "#D4D4D4"
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "options": [
+        {
+          "value": "none",
+          "label": "Default"
+        },
+        {
+          "value": "1",
+          "label": "Scheme 1"
+        },
+        {
+          "value": "2",
+          "label": "Scheme 2"
+        },
+        {
+          "value": "3",
+          "label": "Scheme 3"
+        }
+      ],
+      "default": "1"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Buttons",
+      "options": [
+        {
+          "value": "link",
+          "label": "Link"
+        },
+        {
+          "value": "btn btn--primary",
+          "label": "Primary button"
+        },
+        {
+          "value": "btn btn--secondary",
+          "label": "Secondary button"
+        },
+        {
+          "value": "btn btn--orange",
+          "label": "Orange button"
+        },
+        {
+          "value": "btn btn--cyan",
+          "label": "Cyan button"
+        }
+      ],
+      "default": "btn btn--orange"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "column",
+      "name": "Column",
+      "settings": [
+        {
+          "id": "enable_media",
+          "type": "checkbox",
+          "label": "Enable media",
+          "default": true
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "video",
+          "id": "video_shopify",
+          "label": "Video upload",
+          "info": "Hosted by Shopify. Video will autoplay and be muted. [Read more](https://cleancanvas.co.uk/support/enterprise/using-videos)"
+        },
+        {
+          "type": "range",
+          "id": "media_scale",
+          "min": 65,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "label": "Media scale",
+          "default": 100
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Column"
+        },
+        {
+          "type": "richtext",
+          "id": "sub_heading",
+          "label": "Sub Heading"
+        },
+
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text",
+          "default": "<p>Pair text with an image to focus on a product, collection or blog post. Add details on availability, style, or even provide a review.</p>"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label",
+          "info": "Leave blank for an arrow button"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button link"
+        },
+        {
+          "type": "select",
+          "id": "button_type",
+          "label": "Button Type",
+          "options": [
+            {
+              "value": "ce-requirement",
+              "label": "CE requirement"
+            },
+            {
+              "value": "course-approval",
+              "label": "Course Approval"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "select_discipline",
+          "label": "Select Discipline",
+          "options": [
+            {
+              "value": "physical-therapy",
+              "label": "Physical Therapy"
+            },
+            {
+              "value": "occupational-therapy",
+              "label": "Occupational Therapy"
+            },
+            {
+              "value": "speech-language-pathology",
+              "label": "Speech Language Pathology"
+            },
+            {
+              "value": "athletic-training",
+              "label": "Athletic Training"
+            },
+            {
+              "value": "massage-therapy",
+              "label": "Massage Therapy"
+            }
+          ]
+        },
+        {
+          "type":"header",
+          "content":"Product"
+        },
+        {
+          "type": "product",
+          "id": "product_select",
+          "label": "Select product to show"
+        },
+        {
+          "type": "text",
+          "id": "product_label",
+          "label": "Product button label",
+          "default": "Add to cart"
+        },
+        {
+          "type": "text",
+          "id": "product_badge",
+          "label": "Product badge label"
+        },
+        {
+          "type": "text",
+          "id": "product_duration",
+          "label": "Promo duration"
+        },
+        {
+          "type": "text",
+          "id": "product_promo",
+          "label": "Promo code message",
+          "default": "Save with promo code \"20FLEX\""
+        },
+        {
+          "type": "richtext",
+          "id": "product_specs",
+          "label": "Product specifications"
+        },
+        {
+          "type": "select",
+          "id": "content_align",
+          "label": "Content alignment",
+          "options": [
+            {
+              "value": "text-start",
+              "label": "Left"
+            },
+            {
+              "value": "text-center",
+              "label": "Center"
+            },
+            {
+              "value": "text-end",
+              "label": "Right"
+            }
+          ],
+          "default": "text-start"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Multi-column promotion",
+      "blocks": [
+        {
+          "type": "column"
+        },
+        {
+          "type": "column"
+        },
+        {
+          "type": "column"
+        }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": [
+      "header",
+      "footer",
+      "aside"
+    ]
+  }
+}
+{% endschema %}

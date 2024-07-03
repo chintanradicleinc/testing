@@ -1,0 +1,62 @@
+{% comment %}
+<product-form class="product_cart_add">
+  {% assign product_form_id = 'product-form-' | append: product.id | append: section.id %}
+  {% form 'product', product, class: 'js-product-form js-product-form-main', id: product_form_id %}
+    <select name="id" style="display: none">
+      {% for variant in product.variants %}
+        <option value="{{ variant.id }}"></option>
+      {% endfor %}
+    </select>
+    <input
+      type="hidden"
+      class="qty-input__input input"
+      id="quantity-quickadd"
+      name="quantity"
+      value="1"
+    >
+    {% assign incart = false %}
+    {% for item in cart.items %}
+      {% if item.product.id == product.id %}
+        {% assign incart = true %}
+      {% endif %}
+    {% endfor %}
+    <button
+      type="submit"
+      data-add-to-cart-text="Add to cart"
+      name="add"
+      class="rad_h6 left-sidebar-prod-btn {% if incart == true %}btn--cyan dis_btn{% endif %}"
+      data-product_id="{{ product.id }}"
+    >
+      {% if product.template_suffix contains 'package-products'
+        or product.template_suffix contains 'pre-define-bundle'
+      -%}
+        Choose Options
+      {%- else -%}
+        {%- if incart == true -%}
+          In Cart
+        {%- else -%}
+          Add to Cart
+        {%- endif -%}
+      {%- endif %}
+    </button>
+    <input type="hidden" id="_education_type" name="properties[_education_type]" value="CE">
+    <input type="hidden" id="_state" name="properties[_state]" value="alabama">
+    <input type="hidden" id="_discipline" name="properties[_discipline]" value="pt">
+  {% endform %}
+</product-form>
+
+<script type="application/json" id="custom-product-json">
+  {
+    {%- for variant in product.variants -%}
+    "{{- variant.id -}}": {
+      "profession" : {% if product.metafields.colibri.profession != blank %}{{- product.metafields.colibri.profession -}}{% else %}{}{% endif %},
+      "bundle_hours" : {% if variant.metafields.colibri.bundle_hours != blank %}{{- variant.metafields.colibri.bundle_hours -}}{% else %}{}{% endif %},
+      "current_collection": "{{ collection.handle }}",
+      "extension_duration": "{% if variant.metafields.colibri.webinar_course_hours %}{{- variant.metafields.colibri.extension_duration -}}{% endif %}",
+      "contact_hours": "{{- variant.metafields.colibri.contact_hours -}}",
+      "delivery_method": "{{- variant.metafields.colibri.delivery_method -}}"
+    }{% unless forloop.last %},{% endunless %}
+    {%- endfor -%}
+  }
+</script>
+{% endcomment %}

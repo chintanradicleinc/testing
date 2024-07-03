@@ -1,0 +1,266 @@
+{%- comment -%}
+  Parameters:
+  - is_drawer {Boolean} - Is cart drawer.
+
+  Usage:
+  {% render 'cart-items', is_drawer: true %}
+{%- endcomment -%}
+
+
+{%- if cart != empty -%}
+  <script src="{{ 'cart-items.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}
+
+{%- liquid
+  if is_drawer
+    assign section_id = 'cart-drawer'
+  else
+    assign section_id = section.id
+  endif
+-%}
+
+<cart-items
+  id="cart-items"
+  class="pad_l_r"
+  data-section="{{ section_id }}"
+  data-empty="{% if cart == empty %}true{% else %}false{% endif %}"
+>
+  {%- if cart == empty -%}
+    <div class="cart-empty flex flex-col justify-center items-center h-full js-cart-empty">
+      {%- if settings.cart_icon == 'bag' -%}
+        {%- render 'icon-bag' -%}
+      {%- elsif settings.cart_icon == 'basket' -%}
+        {%- render 'icon-basket' -%}
+      {%- else -%}
+        {%- render 'icon-cart' -%}
+      {%- endif -%}
+
+      <p>{{ 'cart.general.empty' | t }}</p>
+
+      {%- if settings.cart_empty_shop_link -%}
+        <!-- onclick="resetAccreditations()" -->
+        <a class="btn btn--orange"  href="{{ settings.cart_empty_shop_link }}">
+          {{- 'cart.general.start_shopping' | t -}}
+        </a>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+
+  {%- if cart != empty -%}    
+    {%- for item in cart.items -%}      
+      {%- liquid
+        if item.variant.compare_at_price > item.variant.price
+          assign variant_price_reduced = true
+        else
+          assign variant_price_reduced = false
+        endif
+      -%}
+
+      {% if template == 'cart' %}<div class="main_item">
+        <script>
+         var demoproduct = {{ item | json }}
+        </script>
+        <div class="small_img">
+          <div
+            class="backimg card_img"
+            style="{% if item.product.featured_image != blank %}background-image:url({{ item.product.featured_image | img_url: "200x" }}){% else %}background-image:url({{ 'card_img.png' | asset_url }}){% endif %}; background-repeat: no-repeat;background-position: center center;background-size: cover;"
+          >
+            <svg
+              class="transparent_svg"
+              data-name="Layer 1"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 342 194"
+            >
+              <rect class="cls-1" x="0.5" y="0.5" width="341" height="193"></rect>
+            </svg>
+          </div>
+        </div>
+        {% endif %}
+        <div
+          class="cart-item box_pro"
+          id="cart-item-{{ item.index | plus: 1 }}"
+          data-product-id="{{ item.product_id }}"
+          data-variant-id="{{ item.variant_id }}"
+        >
+          <a href="{{ item.url }}">
+            <h2 class="rad_24 pro_heading h4 section__heading mb-0 flex-auto text-left">
+              {{- item.product.title | escape -}}
+            </h2>
+          </a>
+          <div class="price_box">
+            <p class="rad_h6 h6 sub-heading-font mb-0 flex-auto text-center">
+              {% if item.product.metafields.colibri.contact_hours != blank
+                and item.product.metafields.colibri.course_format != blank
+              -%}
+                {{- item.product.metafields.colibri.contact_hours }} Hours
+              {%- endif -%}
+            </p>
+          
+            {%- if item.product.has_only_default_variant == false
+              or item.properties.size != 0
+              or item.selling_plan_allocation != null
+            -%}
+              <div class="cart-item__variants text-sm {% if item.product.template_suffix contains 'membership-product' %}hidden{% endif %}">
+                <dl class="mt-2 mb-0">
+                  {%- if item.product.has_only_default_variant == false -%}
+                    {%- for option in item.options_with_values -%}
+                      <div>
+                        <dt class="inline">
+                          <strong>{{ option.name }}: </strong>
+                        </dt>
+                        <dd class="inline m-0">{{ option.value }}</dd>
+                      </div>
+                    {%- endfor -%}
+                  {%- endif -%}
+                  {%- for property in item.properties -%}
+                    {%- assign property_first_char = property.first | slice: 0 -%}
+                    {%- if property.last != blank and property_first_char != '_' -%}
+                      <div class="property-{{ property.first | replace: ' ','-' | downcase }}">
+                        <dt class="inline">
+                          <strong>{{ property.first }} : </strong>
+                        </dt>
+                        <dd class="inline m-0">
+                          {%- if property.last contains '/uploads/' -%}
+                            <a href="{{ property.last }}" class="link" target="_blank">
+                              {{ property.last | split: '/' | last }}
+                            </a>
+                          {%- else -%}
+                            {{ property.last }}
+                          {%- endif -%}
+                        </dd>
+                      </div>
+                    {%- endif -%}
+                  {%- endfor -%}
+                </dl>
+
+                {%- if item.selling_plan_allocation != null -%}
+                  <p class="mt-2 mb-0">{{ item.selling_plan_allocation.selling_plan.name }}</p>
+                {%- endif -%}
+              </div>
+            {%- endif -%}
+            <div class="product-info__block_member cart-item__qty">
+              {%- if variant_price_reduced or item.original_line_price != item.final_line_price -%}
+                <dl class="mt-2 mb-0 flex price_flex">
+                  <dt class="visually-hidden">
+                    {{- 'products.product.price.sale_price' | t -}}
+                  </dt>
+                  <dd class="rad_36 price__current">
+                    {%- render 'price-as-money', price: item.final_price, show_money_with_currency: false -%}
+                  </dd>
+                  <dt class="visually-hidden">
+                    {{- 'products.product.price.regular_price' | t -}}
+                  </dt>
+                  <dd class="inline m-0">
+                    {%- if variant_price_reduced -%}
+                      <s class="rad_h5 price__was{% if settings.superscript_decimals %} price__was--supercents{% endif %}">
+                        {%- render 'price-as-money',
+                          price: item.variant.compare_at_price,
+                          show_money_with_currency: false
+                        -%}
+                      </s>
+                    {%- else -%}
+                      <s class="rad_h5 price__was{% if settings.superscript_decimals %} price__was--supercents{% endif %}">
+                        {%- render 'price-as-money', price: item.original_price, show_money_with_currency: false -%}
+                      </s>
+                    {%- endif -%}
+                  </dd>
+                </dl>
+              {%- else -%}
+                <strong class="price__current">
+                  {%- render 'price-as-money', price: item.original_price, show_money_with_currency: false -%}
+                </strong>
+              {%- endif -%}
+            <div class="hidden">
+              {% render 'quantity-input', is_cart: true, item: item, layout_style: 'combined' %}
+            </div> 
+              <div class="item_r_c">
+                {% assign variant_count = item.product.variants | size %}
+                {% assign product_url = item.product.url | append:"?variant=" | append: item.variant_id | append: "&op=change" %}
+                {% assign added_variant_id = item.index | plus: 1 %}
+                {% comment %}
+                {% render 'preview-course-button', settings: settings, product: item.product, product_url:product_url, section_id: section.id, product_not_for_sale: product_not_for_sale, added_variant_id:added_variant_id %}
+                {% endcomment %}
+
+                {%- if settings.enable_quick_add and disable_quickbuy != true -%}
+                  <div
+                    class="{% if variant_count == 1 %}hidden{% endif %} 
+                      card__quick-add
+                      {% if settings.card_atc_mobile == "text_button_bottom" %}mob:card__quick-add--below{% endif %}
+                      {% if settings.card_atc_mobile == "icon" %}mob:card__quick-add--icon{% endif %}
+                      {% if settings.card_atc_desktop == "text_button_bottom" %}desktop:card__quick-add--below{% endif %}
+                      {% if settings.card_atc_desktop == "icon" %}desktop:card__quick-add--icon{% endif %}
+                      {% if item.product.template_suffix contains 'membership-product' %}hidden{% endif %}
+                    "
+                  >
+                    {%- assign product_form_id = 'quick-add-' | append: section_id | append: product.id -%}
+
+
+     
+                      <div class="no-js-hidden">
+                        <div data-product="{{ item.product.id }}"
+                          type="button"
+                          class="rad_h6 preview_c btn btn--orange js-quick-add"
+                          aria-haspopup="dialog"
+                          data-product-url="{{ product_url }}"
+                          data-product-default-variant="{{ product.has_only_default_variant }}"
+                          {% if selected_color %}
+                            data-selected-color="{{ selected_color }}"
+                          {% endif %}
+                          {% if added_variant_id %}
+                            data-added-variant="{{ added_variant_id }}"
+                            data-variant-id="{{ item.variant_id }}"
+                          {% endif %}
+                          {%- for property in item.properties -%}
+                            {% if property.first contains '_admin_state' %}
+                              data-state="{{ property.last }}"
+                            {% endif %}  
+                            {% if property.first contains '_admin_discipline' %}
+                              data-discipline="{{ property.last }}"
+                            {% endif %}  
+                          {% endfor %}
+                        >
+                          
+                            Change
+                          
+                        </div>
+                      </div>
+                  </div>
+                {%- endif -%}
+                
+                  <a
+                    class="rad_h6 cart-item__remove btn text-current tap-target js-remove-item"
+                    href="{{ item.url_to_remove }}"
+                    data-index="{{ item.index | plus: 1 }}"
+                    aria-label="{{- 'cart.items.remove' | t -}}"
+                    {% if settings.preload_links %}
+                      data-no-instant
+                    {% endif %}
+                  >
+                    Remove
+                  </a>
+                  <div class="alert mt-6 bg-error-bg text-error-text cart-item__error" id="line-item-error-{{ item.index | plus: 1 }}" role="alert" hidden></div>
+              </div>
+            </div>
+   
+          </div>
+        </div>
+        
+      {% if template == 'cart' %}</div>{% endif %}
+      {%- unless forloop.last -%}
+        <hr class="cart_hr">
+      {% endunless %}
+    {%- endfor -%}
+  {%- endif -%}
+
+  <p class="hidden" id="cart-live-region-text" role="status" aria-live="polite">
+    {{ 'cart.summary.subtotal' | t }}:
+    {%- render 'price-as-money', price: cart.total_price, show_money_with_currency: true -%}
+  </p>
+  <p class="hidden" id="cart-line-item-status" role="status" aria-live="polite" aria-hidden="true">
+    {{- 'accessibility.loading' | t -}}
+  </p>
+
+  {%- if is_drawer -%}
+    <div class="alert mt-6 bg-error-bg text-error-text" id="cart-errors" role="alert" hidden></div>
+  {%- endif -%}
+</cart-items>

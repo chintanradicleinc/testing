@@ -1,0 +1,138 @@
+<button onclick="toggleBox()" class="rad_h6 section_category_button2 mobile-only">
+  Accreditation Information
+                    <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false" role="presentation" class="icon"><path d="M20 8.5 12.5 16 5 8.5" stroke="currentColor" stroke-width="1.5" fill="none"></path></svg>
+
+</button>
+  <div class="section-category is-fixed">
+    <div class="flex items-center gap-x-theme mb-5">
+      <h2 class="disclosure__title product-info__disclosure font-body font-bold text-body flex flex-auto items-center mb-0">
+        Accreditation Information:
+      </h2>
+      <button onclick="toggleBox()" type="button" class="drawer__close-btn js-close-drawer mobile-only">
+        <span class="visually-hidden">Close</span>
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="1.5"
+          fill="none"
+          fill-rule="evenodd"
+          stroke-linejoin="round"
+          aria-hidden="true"
+          focusable="false"
+          role="presentation"
+          class="icon"
+        >
+          <path d="M5 19 19 5M5 5l14 14"></path>
+        </svg>
+      </button>
+    </div>
+        <div class="rte" data-rte="">  
+            <select id="iFunction" name="iFunction" onchange="changeddl(this)">
+              {% assign variable = 0 %}
+             {% assign first_drop = block.settings.collection_first_tree %}
+              {% if collection.metafields.colibri.select_state == blank %}
+               <option value="-1" selected="">Choose State*</option>
+              {% endif %}  
+                {% for link in first_drop.links -%}
+                  {% assign variable = variable | plus: 1 %}
+                  <option value="{{ variable }}" {% if collection.metafields.colibri.state == link.title %}selected="selected"{% endif %}>{{ link.title }}</option>
+               {% endfor %}
+            </select>
+          <script>
+            function toggleBox(){
+              $('.js-product .section-category').toggleClass('open');
+            }
+            $(document).ready(function(){ 
+              $('#button1').click(function(){ 
+                var state_selected = $('.left_extra #iFunction :selected').text();
+                var state_add = '-' + state_selected;
+                var state_low = state_add.toLowerCase();
+                var disc_selectedd = $('.left_extra #iOperation  :selected').text();
+                var disc_repl = disc_selectedd.replace('/', '-')
+                var disc_low = disc_repl.toLowerCase();
+                var collection_info =  disc_low + state_low;
+                var final_data = "";
+
+             
+                    {%- for accred in product.metafields.colibri.accreditation.value -%}   
+                      
+                       var protest = {{ accred.name | json }}
+                       {% assign discipline_parent = accred.license_group.license_types %}
+                       var state = {{ accred.state.name | json }}
+                       var providerCode = {{ accred.code | json }}  
+                       var expiryCompare = {{ accred.expires_on | json }} 
+                       var course_hours = {{ accred.hours | json }}  
+                       var is_mandatory = {{ accred.is_mandatory | json }}  
+                        {% assign noTime = accred.expires_on | split: 'T' %}
+                        var expiry = {{ noTime[0] | json }}
+                       var state_selected = $('#iFunction :selected').text();
+
+                      // Current date code
+
+                      var currentDate = new Date().getTime() / 1000;
+
+
+                      var date = new Date(expiryCompare);
+                      var expirySeconds = date.getTime() / 1000;
+                     {% for discipline_child in discipline_parent %}  
+                        var discipline = {{ discipline_child.name | json }};
+                        var providerCodeNull = (providerCode == '0' || providerCode == null || providerCode == '') ? "visiblity-hidden" : "";
+                        var course_hoursNull = (course_hours == '0' || course_hours == null || course_hours == '') ? "visiblity-hidden" : "";
+                        var is_mandatoryNull = (is_mandatory == '0' || is_mandatory == null || is_mandatory == '') ? "visiblity-hidden" : "";
+                       if(state_selected === state && (currentDate < expirySeconds || expiry == null) && discipline === disc_selectedd){
+                         if(expiry == null){
+                           final_data = '<table class="table-filter"><thead><tr><th>APPROVAL STATUS</th><th>PROVIDER CODE</th><th>EXPIRATION DATE</th></tr></thead><tbody><tr><td>' + protest + '</td><td class="'+providerCodeNull+'">' + providerCode + '</td><td></td></tr></tbody></table>';
+                           // final_data += '<table class="table-filter"><thead><tr><th>HOURS</th><th>MANDATORY</th></tr></thead><tbody><tr><td class="'+course_hoursNull+'">' + course_hours + '</td><td class="'+is_mandatoryNull+'">' + is_mandatory + '</td></tr></tbody></table>';   
+                           /*
+                           if(course_hours == '0' || course_hours == null || course_hours == ''){
+                             final_data = '<table class="table-filter"><thead><tr><th>APPROVAL STATUS</th><th>PROVIDER CODE</th><th>EXPIRATION DATE</th></tr></thead><tbody><tr><td>' + protest + '</td><td class="'+providerCodeNull+'">' + providerCode + '</td><td></td></tr></tbody></table><table class="table-filter"><thead><tr><th>HOURS</th><th>MANDATORY</th></tr></thead><tbody><tr><td></td><td></td></tr></tbody></table>';
+                           }else{
+                             final_data = '<table class="table-filter"><thead><tr><th>APPROVAL STATUS</th><th>PROVIDER CODE</th><th>EXPIRATION DATE</th></tr></thead><tbody><tr><td>' + protest + '</td><td class="'+providerCodeNull+'">' + providerCode + '</td><td></td></tr></tbody></table><table class="table-filter"><thead><tr><th>HOURS</th><th>MANDATORY</th></tr></thead><tbody><tr><td>' + course_hours + '</td><td>' + is_mandatory + '</td></tr></tbody></table>';   
+                           } // document.getElementById("output").innerHTML ='<table class="table-filter"><thead><tr><th>STATE</th><th>DISCIPLINE</th><th>APPROVAL STATUS</th><th>PROVIDER CODE</th><th>EXPIRATION DATE</th><th>HOURS</th><th>MANDATORY</th></tr></thead><tbody><tr><td>' + state + '</td><td>' + discipline + '</td><td>' + protest + '</td><td>' + providerCode + '</td><td>' + expiry + '</td></tbody></table>';
+                           */
+                          }else{
+                             final_data = '<table class="table-filter"><thead><tr><th>APPROVAL STATUS</th><th>PROVIDER CODE</th><th>EXPIRATION DATE</th></tr></thead><tbody><tr><td>' + protest + '</td><td class="'+providerCodeNull+'">' + providerCode + '</td><td>' + expiry + '</td></tr></tbody></table>';
+                             // final_data += '<table class="table-filter"><thead><tr><th>HOURS</th><th>MANDATORY</th></tr></thead><tbody><tr><td class="'+course_hoursNull+'">' + course_hours + '</td><td class="'+is_mandatoryNull+'">' + is_mandatory + '</td></tr></tbody></table>';
+                             /*
+                            if(course_hours == '0' || course_hours == null || course_hours == ''){
+                             final_data = '<table class="table-filter"><thead><tr><th>APPROVAL STATUS</th><th>PROVIDER CODE</th><th>EXPIRATION DATE</th></tr></thead><tbody><tr><td>' + protest + '</td><td class="'+providerCodeNull+'">' + providerCode + '</td><td>' + expiry + '</td></tr></tbody></table><table class="table-filter"><thead><tr><th>HOURS</th><th>MANDATORY</th></tr></thead><tbody><tr><td></td><td></td></tr></tbody></table>';   
+                            }else{
+                             final_data = '<table class="table-filter"><thead><tr><th>APPROVAL STATUS</th><th>PROVIDER CODE</th><th>EXPIRATION DATE</th></tr></thead><tbody><tr><td>' + protest + '</td><td class="'+providerCodeNull+'">' + providerCode + '</td><td>' + expiry + '</td></tr></tbody></table><table class="table-filter"><thead><tr><th>HOURS</th><th>MANDATORY</th></tr></thead><tbody><tr><td>' + course_hours + '</td><td>' + is_mandatory + '</td></tr></tbody></table>';    
+                            }
+                           */
+                          }
+                       }else{}   
+                     {% endfor %}  
+                    {%- endfor -%}   
+             
+                if(final_data != ""){
+                  document.getElementById("output").innerHTML = final_data;
+                }else{
+                  document.getElementById("output").innerHTML = 'Accreditation information is not available';  
+                }
+              });
+            if(($('.left_extra #iFunction').val() != -1) && ($('.left_extra #iOperation').val() != -1)){
+                $('#button1').trigger('click');
+              }  
+            });
+            </script>
+    
+            <select id="iOperation" name="iOperation" class="{% if collection.metafields.colibri.discipline != blank %}rmv_disable{% endif %}" onchange="javascript:handleSelect(this)" {% if collection.metafields.colibri.discipline == blank %}disabled=""{% endif %}>
+              {% if collection.metafields.colibri.discipline == blank %}
+                <option value="" selected="">Choose Discipline*</option>
+              {% endif %}    
+              {% for link in first_drop.links -%}
+                  {%- for childlink in link.links -%}
+                <option value="{{ childlink.url | remove: "/" }}" {% if collection.metafields.colibri.discipline == childlink.title %}selected="selected"{% endif %}>{{ childlink.title }}</option>
+                 {% endfor %}   
+              {% endfor %}
+            </select>
+        <button id="button1" class="button-primary featured-collection__button mdc-ripple-surface mdc-ripple-upgraded">{{ block.settings.category_btn_text }}</button>
+
+          <div id="output"></div>
+
+      </div>
+    </div>
+    

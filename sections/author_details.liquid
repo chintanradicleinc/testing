@@ -1,0 +1,212 @@
+{{ 'media-with-text.css' | asset_url | stylesheet_tag }}
+<div class="author_list section section--full-width section--padded ">
+  <div class="container mb-5">
+    <a class="back_all" href="/pages/authors">Back To All</a>
+  </div>
+  <div class="container">
+    <div class="media-with-icon-text media-with-text">
+      <div class="media-with-text__media relative flex flex-col justify-center overflow-hidden">
+        <div class="media w-full relative">
+          {% if metaobject.photo_url != blank %}
+            <img src="{{ metaobject.photo_url }}" alt="{{ metaobject.name.value }}">
+          {% elsif metaobject.photo.value != blank %}
+            <img src="{{ metaobject.photo.value | img_url:'400x' }}" alt="{{ metaobject.name.value }}">
+          {% else %}
+            {{ 'image' | placeholder_svg_tag: 'media__placeholder dark' }}
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="media-with-text__text flex flex-col justify-center ">
+        <h2 class="author_heading rad_h2 mb-0">{{ metaobject.name.value }}</h2>
+        <div class="rad_h6 author_content">
+          {{ metaobject.bio }}
+        </div>
+      </div>
+      {{ metaobject.product_reference }}
+       {{ metaobject.metaobject_reference }}
+    </div>
+    {% assign prs = metaobject.product_list.value %}
+    {% if prs != blank %}
+    <div class="catalog-table">
+      <h2 class="rad_h4 h4 section__heading">Courses</h2>
+      <div class="table-header">
+        <ul>
+          <li class="module-name wid-35 rad_h6">Course Title</li>
+          <li class="format wid-10 rad_h6">Format</li>
+          {% comment %}
+            <li class="preview wid-10 rad_h6">Preview</li>
+          {% endcomment %}
+          <li class="hours wid-10 rad_h6">Hours</li>
+          <li class="price wid-180 rad_h6">
+            <div>Online/Mail Price</div>
+          </li>
+          <li class="action wid-180 rad_h6">
+            <div>Online/Mail</div>
+          </li>
+        </ul>
+      </div>
+      <div id="post-564345" class="course-info no-promo">
+        {% for pr in prs %}
+          {% if pr != blank %}
+            <ul class="catalog-list" data-state="" data-category="">
+              <li class="rad_h6 module-name wid-35">
+                <div>
+                  <a href="{{ pr.url }}">
+                    {{- pr.title }}
+                  </a>
+                  {% if pr.metafields.colibri.course_format != blank %}
+                    <div class="mob_show">Format: {{ pr.metafields.colibri.course_format }}</div>
+                  {% endif %}
+                </div>
+              </li>
+              <li class="rad_h6 format wid-10">
+                <div class="catalog-format-container">
+                  {{ pr.metafields.colibri.course_format }}
+                </div>
+              </li>
+              {% comment %}
+                <li class="rad_h6 preview wid-10">
+                   {% render 'preview-course-button', settings: settings, product: pr, product_url:pr.url, section_id: section.id, product_not_for_sale: product_not_for_sale  %}
+
+                </li>
+              {% endcomment %}
+              <li class="rad_h6 hours wid-10">
+                {% if pr.metafields.colibri.contact_hours != blank %}
+                  <div><span class="510_show">Hours:</span> {{ pr.metafields.colibri.contact_hours }}</div>
+                {% endif %}
+              </li>
+              <li class="price catalog-course wid-180">
+                <div class="price price--top">
+                  <div class="price__default">
+                    <span class="price__from">From</span>
+                    <strong class="rad_36 price__current">{% for variant in pr.variants %}{{ variant.price | money | remove:".00" }}{% unless forloop.last %} / {% endunless %}{% endfor %} </strong>
+                    <s class="rad_h5 price__was"></s>
+                  </div>
+                </div>
+                {% comment %}
+                  {%- render 'price', product: pr, class: 'price--top' -%}
+                {% endcomment %}
+              </li>
+              <li class="rad_h6 action wid-180">
+                {% render 'preview-course-button',
+                  settings: settings,
+                  product: pr,
+                  product_url: pr.url,
+                  section_id: section.id,
+                  product_not_for_sale: product_not_for_sale
+                %}
+              </li>
+            </ul>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<course-drawer
+  data-c_id="{{ product.id }}"
+  class="drawer drawer--course drawer--cart fixed top-0 right-0 flex flex-col w-full has-motion"
+  data-name="course-drawer"
+  id="course-drawer"
+  role="dialog"
+  aria-label="Your cart"
+  aria-modal="true"
+  aria-hidden="false"
+  tabindex="-1"
+  data-shipping-calculator="false"
+>
+  <header class="pad_l_r line_height drawer__header flex justify-between items-center">
+    <h2 class="h5 mb-0">Quick View</h2>
+    <div class="flex items-center gap-x-theme">
+      <button type="button" class="drawer__close-btn js-close-drawer">
+        <span class="visually-hidden">Close</span>
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="1.5"
+          fill="none"
+          fill-rule="evenodd"
+          stroke-linejoin="round"
+          aria-hidden="true"
+          focusable="false"
+          role="presentation"
+          class="icon"
+        >
+          <path d="M5 19 19 5M5 5l14 14"></path>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="course-drawer__content drawer__content drawer__content--flex flex-auto items-center">
+    {% for product in prs %}
+      <div
+        class="pad_l_r top_pro grow flex items-center {% unless forloop.first %}hidden{% endunless %}"
+        data-pid="{{ product.id }}"
+      >
+        <h2 class="h4 section__heading mb-0 flex-auto text-left align-self-start">
+          {{ product.title }}
+        </h2>
+        <hr class="course_hr">
+        <div class="c_info align-self-start">
+          <div class="hours_review">
+            <span class="pro_hours">
+              {% if product.metafields.colibri.contact_hours != blank
+                and product.metafields.colibri.course_format != blank
+              -%}
+                {{- product.metafields.colibri.contact_hours }} Hours
+              {%- endif -%}
+            </span>
+            {% comment %}
+              <span class="card_star"
+                >★★★★★
+                <div class="star_num">(2)</div>
+              </span>
+            {% endcomment %}
+            {% if product.metafields.colibri.instructional_level != blank %}
+              <span class="ins">Instructional Level: {{ product.metafields.colibri.instructional_level }}</span>
+            {% endif %}
+          </div>
+          <div class="icon_txt">
+            <img src="{{ 'pro_icon.png' | asset_url }}" /><span>Text</span>
+          </div>
+        </div>
+        <div class="c_acc_cart product-info__block_member">
+          {%- render 'price', product: product, class: 'price--top' -%}
+          {% if prs != blank %}
+            {% render 'add_custom', product: product, section: section %}
+          {% endif %}
+        </div>
+        {% if product.description != blank %}
+          <div class="rte c_description">
+            <a href="{{ product.url }}">
+              <span class="orange_txt">Full Course Description</span>
+            </a>
+            <div class="inn_desc">
+              {{ product.description | truncatewords: 75 }}
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+  <div class="course-drawer__summary relative drawer__footer course-drawer--checkout--sticky-true"></div>
+  <div class="overlay overlay--drawer absolute top-0 right-0 bottom-0 left-0 js-close"></div>
+</course-drawer>
+
+{% schema %}
+{
+  "name": "Author Details",
+  "class": "authors authors_details",
+  "settings": [],
+  "presets": [{
+      "name": "Author Details",
+      "category": "Text"
+}]
+}
+{% endschema %}

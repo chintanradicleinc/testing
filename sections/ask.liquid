@@ -1,0 +1,293 @@
+{%- liquid
+  assign color_scheme = section.settings.color_scheme
+  assign bg_color = false
+
+  if color_scheme == '1'
+    assign bg_color = settings.color_scheme_1_bg
+  elsif color_scheme == '2'
+    assign bg_color = settings.color_scheme_2_bg
+  elsif color_scheme == '3'
+    assign bg_color = settings.color_scheme_3_bg
+  endif
+
+  if bg_color == settings.bg_color or bg_color == 'rgba(0,0,0,0)'
+    assign bg_color = false
+  endif
+-%}
+
+{%- unless section.settings.full_width -%}
+  <div class="container">
+{%- endunless -%}
+
+<div
+  class="section{% unless bg_color == false %} section--padded{% if section.settings.full_width %} section--full-width{% endif %}{% endunless %}{% unless color_scheme == 'none' %} color-scheme color-scheme--{{ color_scheme }}{% endunless %}"
+  id="{{ section.id }}"
+>
+  <div class="container">
+    <div
+      class="ask_width reading-width"
+      {% if settings.animations_enabled != 'disabled' %}
+        data-cc-animate
+      {% endif %}
+    >
+      {%- if section.settings.heading != blank -%}
+        <h2 class="h4 rad_h2 section__heading mb-0 {{ section.settings.heading_align }}">
+          {{ section.settings.heading | escape }}
+        </h2>
+        <p class="text-theme-light reading-width mx-auto text-center mb-12">
+          {{ section.settings.subheading | escape }}
+        </p>
+      {%- endif -%}
+      <div class="ask-experts-search">
+        <div class="search relative" role="search" action="/search" method="get">
+          <search-form class="search__form block">
+            <input type="hidden" name="type" value="product,">
+            <input type="hidden" name="options[prefix]" value="last">
+            <input
+              type="search"
+              class="search__input w-full input js-search-input"
+              id="main-search"
+              name="q"
+              placeholder="Search for Experts"
+              value=""
+              data-placeholder-two="Search for Experts"
+              data-placeholder-prompts-mob="false"
+              data-typing-speed="100"
+              data-deleting-speed="60"
+              data-delay-after-deleting="500"
+              data-delay-before-first-delete="2000"
+              data-delay-after-word-typed="2400"
+              role="combobox"
+              autocomplete="off"
+              aria-autocomplete="list"
+              aria-controls="predictive-search-results"
+              aria-owns="predictive-search-results"
+              aria-haspopup="listbox"
+              aria-expanded="false"
+              spellcheck="false"
+            ><button class="search__submit text-current absolute focus-inset start">
+              <span class="visually-hidden">Search</span>
+              <svg
+                width="21"
+                height="23"
+                viewBox="0 0 21 23"
+                fill="currentColor"
+                aria-hidden="true"
+                focusable="false"
+                role="presentation"
+                class="icon"
+              >
+                <path d="M14.398 14.483 19 19.514l-1.186 1.014-4.59-5.017a8.317 8.317 0 0 1-4.888 1.578C3.732 17.089 0 13.369 0 8.779S3.732.472 8.336.472c4.603 0 8.335 3.72 8.335 8.307a8.265 8.265 0 0 1-2.273 5.704ZM8.336 15.53c3.74 0 6.772-3.022 6.772-6.75 0-3.729-3.031-6.75-6.772-6.75S1.563 5.051 1.563 8.78c0 3.728 3.032 6.75 6.773 6.75Z"></path>
+              </svg>
+            </button>
+            <button
+              type="button"
+              class="search__reset text-current vertical-center absolute focus-inset js-search-reset"
+              hidden=""
+            >
+              <span class="visually-hidden">Reset</span>
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="1.5"
+                fill="none"
+                fill-rule="evenodd"
+                stroke-linejoin="round"
+                aria-hidden="true"
+                focusable="false"
+                role="presentation"
+                class="icon"
+              >
+                <path d="M5 19 19 5M5 5l14 14"></path>
+              </svg></button
+          ></search-form>
+          <div class="js-search-results" tabindex="-1" data-predictive-search=""></div>
+          <span class="js-search-status visually-hidden" role="status" aria-hidden="true"></span>
+        </div>
+        {% comment %}
+          {% render 'predictive-search', id: 'main-search', persist_value: true %}
+
+            <div class="search-box">
+              <input
+                type="text"
+                name="experts_search"
+                id="experts_search"
+                value=""
+                class="experts_search"
+                placeholder="Search.."
+              >
+            </div>
+        {% endcomment %}
+      </div>
+      <p class="no-items-message" style="display: none;">No items found.</p>
+
+      {% for ask_expert in shop.metaobjects.ask_expert.values %}
+        {% if ask_expert.question != blank and ask_expert.answer != blank %}
+          <details-disclosure>
+            <details class="disclosure disclosure--row">
+              <summary>
+                <div class="flex justify-between items-center">
+                  <h4 class="rad_h5 disclosure__title xs:regular-text h6 font-body flex flex-auto items-center mb-0 text-current">
+                    <span class="que_icon rad_h3"
+                      >Q
+                      <div>|</div>
+                    </span>
+                    {{ ask_expert.question }}
+                  </h4>
+                  <span class="disclosure__toggle">
+                    <svg
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                      focusable="false"
+                      role="presentation"
+                      class="icon"
+                    >
+                      <path d="M20 8.5 12.5 16 5 8.5" stroke="currentColor" stroke-width="1.5" fill="none"></path>
+                    </svg>
+                  </span>
+                </div>
+              </summary>
+
+              <div class="disclosure__panel has-motion">
+                <div class="disclosure__content rte">
+                  {{ ask_expert.answer | truncatewords: 100 }}
+
+                  <a href="{{ ask_expert.system.url }}" class="see_ans">Read More</a>
+                </div>
+              </div>
+            </details>
+          </details-disclosure>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+{%- unless section.settings.full_width -%}
+  </div>
+{%- endunless -%}
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const searchInput = document.querySelector('.js-search-input');
+    const faqTitles = document.querySelectorAll('.disclosure__title');
+    const noItemsMessage = document.querySelector('.no-items-message');
+
+    searchInput.addEventListener('input', function() {
+      const searchTerm = this.value.trim().toLowerCase();
+      let foundItems = false;
+
+      faqTitles.forEach(title => {
+        const faqText = title.textContent.trim().toLowerCase();
+        if (faqText.includes(searchTerm)) {
+          title.closest('.disclosure').style.display = 'block';
+          foundItems = true;
+        } else {
+          title.closest('.disclosure').style.display = 'none';
+        }
+      });
+
+      if (!foundItems) {
+        noItemsMessage.style.display = 'block';
+      } else {
+        noItemsMessage.style.display = 'none';
+      }
+    });
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Collapsible content",
+  "tag": "section",
+  "class": "cc-faq",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section header"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Ask the Experts"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Sub Heading",
+      "default": "Quick therapy questions from you, answered by our expert speakers."
+    },
+    {
+      "type": "select",
+      "id": "heading_align",
+      "label": "Heading alignment",
+      "options": [
+        {
+          "value": "text-start",
+          "label": "Left"
+        },
+        {
+          "value": "text-center",
+          "label": "Center"
+        },
+        {
+          "value": "text-end",
+          "label": "Right"
+        }
+      ],
+      "default": "text-center"
+    },
+    {
+      "type": "header",
+      "content": "Style"
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "options": [
+        {
+          "value": "none",
+          "label": "Default"
+        },
+        {
+          "value": "1",
+          "label": "Scheme 1"
+        },
+        {
+          "value": "2",
+          "label": "Scheme 2"
+        },
+        {
+          "value": "3",
+          "label": "Scheme 3"
+        }
+      ],
+      "default": "1"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "label": "Make section background full width",
+      "default": true
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collapsible content"
+    }
+  ],
+  "disabled_on": {
+    "groups": [
+      "header",
+      "footer",
+      "aside"
+    ]
+  }
+}
+{% endschema %}

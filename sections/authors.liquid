@@ -1,0 +1,122 @@
+{{ 'media-with-text.css' | asset_url | stylesheet_tag }}
+{% comment %}
+{% for authork in shop.metaobjects.authors.values %}
+  {{ authork.name }}<br/>
+  {% endfor %}
+{% endcomment %}
+
+<a id="button_top"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false" role="presentation" class="icon"><path d="M20 8.5 12.5 16 5 8.5" stroke="currentColor" stroke-width="1.5" fill="none"></path></svg></a>
+
+<div id="top" class="rad_h6 authors_pagination">
+  {% assign letters = 'a b c d e f g h i j k l m n o p q r s t u v w x y z' | split: ' ' %}
+  <div class="container">
+    <ul>
+      {% for letter in letters %}
+        <li>
+          <a
+            class="author_pagination"
+            href="#letter_{{ letter | upcase }}"
+          >
+            {{- letter | upcase -}}
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+
+{% assign initials = '' %}
+
+{% paginate shop.metaobjects.authors.values by 2000 %}
+{% for author in shop.metaobjects.authors.values %}
+  
+  {% assign letter = author.name | slice: 0 %}
+  {% unless initials contains letter %}
+    {% assign initials = initials | append: ',' | append: letter %}
+    {% unless forloop.first %}</div>{% endunless %}
+    <div id="letter_{{ letter }}" class="container">
+      <div class="author_heading_letter">
+        <span class="rad_h5 h5">
+          {{ letter }}
+          {% unless forloop.first %}
+            <a id="back_top" href="#top">Back To Top</a>
+          {% endunless %}
+        </span>
+      </div>
+    </div>
+    <div class="author_list_wrapper">
+  {% endunless %}
+  <div class="author_list section section--full-width section--padded ">
+    <div class="container">
+     
+      <div class="media-with-icon-text media-with-text">
+        {% if author.photo_url != blank %}
+          <div class="media-with-text__media relative flex flex-col justify-center overflow-hidden">
+            <div class="media w-full relative">
+              <img src="{{ author.photo_url }}" alt="{{ author.name }}" />
+            </div>
+          </div>        
+        {% elsif author.photo != blank %}
+          <div class="media-with-text__media relative flex flex-col justify-center overflow-hidden">
+            <div class="media w-full relative">
+              <img src="{{ author.photo | img_url:'400x' }}" alt="{{ author.name }}" />
+            </div>
+          </div>
+        {% else %}
+          <div class="media-with-text__media relative flex flex-col justify-center overflow-hidden">
+            <div class="media w-full relative">
+              {{ 'image' | placeholder_svg_tag: 'media__placeholder dark' }}
+            </div>
+          </div>
+        {% endif %}
+
+        <div class="media-with-text__text flex flex-col justify-center ">
+          <a href="{{ author.system.url }}">
+            <h2 class="rad_h4 author_heading h4 section__heading mb-0 flex-auto text-center">{{ author.name }}</h2>
+            {{ author.system.referenced_by }}
+          </a>
+          <div class="rad_14 author_content">
+            {{ author.bio }}
+          </div>
+          <a class="rad_14 btn btn--orange author_inner" href="{{ author.system.url }}">Read More</a>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endfor %}
+{% endpaginate %}
+<script>
+  $(".author_pagination").click(function() {
+    $('html, body').animate({
+      scrollTop: $($(this).attr('href')).offset().top
+    }, 2000);
+  });
+
+var btn = $('#button_top');
+
+$(window).scroll(function() {
+  if ($(window).scrollTop() > 300) {
+    btn.addClass('show');
+  } else {
+    btn.removeClass('show');
+  }
+});
+
+btn.on('click', function(e) {
+  e.preventDefault();
+  $('html, body').animate({scrollTop:0}, '300');
+});
+
+
+</script>
+{% schema %}
+{
+  "name": "Authors",
+  "class": "authors",
+  "settings": [],
+  "presets": [{
+      "name": "Author",
+      "category": "Text"
+}]
+}
+{% endschema %}

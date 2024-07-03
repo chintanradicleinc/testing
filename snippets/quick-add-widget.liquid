@@ -1,0 +1,32 @@
+{%- if request.design_mode == false and settings.preload_links -%}
+  <script src="{{ 'instant-page.js' | asset_url }}" type="module" defer="defer"></script>
+{%- endif -%}
+{%- if settings.enable_quick_add -%}
+  {% unless template.suffix contains "collection" %}
+  <script src="{{ 'quick-add.js' | asset_url }}" defer="defer"></script>
+      {%- liquid
+    if request.page_type == 'collection' or request.page_type == 'search'
+      if settings.enable_compare
+        echo 'compare-toggle.css' | asset_url | stylesheet_tag
+        render 'product-compare'
+      endif
+    endif
+  
+    if settings.enable_quick_add
+      assign show_quick_add_drawer = true
+  
+      if request.page_type contains 'customers'
+        unless request.page_type == 'customers/login' or request.page_type == 'customers/register'
+          assign show_quick_add_drawer = false
+        endunless
+      endif
+    else
+      assign show_quick_add_drawer = false
+    endif
+  
+    if show_quick_add_drawer
+      render 'quick-add-drawer', section: section
+    endif
+  -%}
+  {% endunless %}  
+{%- endif -%}

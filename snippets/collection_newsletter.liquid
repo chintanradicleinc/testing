@@ -1,0 +1,138 @@
+<section id="shopify-section-template-{{ section.id }}" class="shopify-section collection_popup cc-pop-up">
+  {{ 'popup.css' | asset_url | stylesheet_tag }}
+  {{ 'modal.css' | asset_url | stylesheet_tag }}
+
+  <!-- <script src="{{ 'pop-up.js' | asset_url }}" defer="defer"></script> -->
+  <style type="text/css">
+    #template-{{ section.id }} .modal__window {
+      background: #ffffff;
+      --bg-color: 255 255 255;
+      --heading-color: 7 7 7;
+      --text-color: 7 7 7;
+      --link-color: 7 7 7;
+    }
+  </style>
+  <pop-up
+    class="popup-section modal invisible fixed top-0 left-0 w-full h-full flex justify-center items-center"
+    id="template-{{ section.id }}"
+    data-trigger="delay"
+    data-mode=""
+    data-show-on-mobile="true"
+  >
+    <div
+      class="modal__window modal__window--no-image-block flex relative bg-theme-bg text-theme-text text-start has-motion"
+      role="dialog"
+      aria-labelledby="template-{{ section.id }}-heading"
+      aria-modal="true"
+      tabindex="-1"
+    >
+   
+      <button type="button" class="hidden modal__close-btn absolute text-current js-close-modal">
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="1.5"
+          fill="none"
+          fill-rule="evenodd"
+          stroke-linejoin="round"
+          aria-hidden="true"
+          focusable="false"
+          role="presentation"
+          class="icon"
+        >
+          <path d="M5 19 19 5M5 5l14 14"></path>
+        </svg>
+        <span class="visually-hidden">Close</span>
+      </button>
+   
+      <div class="flex-auto modal__content modal__content--p-large relative text-center">
+        <h2 class="h4" id="template-{{ section.id }}-heading">Select your State and Profession</h2>
+       {% if section.settings.show_category_filter != blank and section.settings.collection_first_tree != blank %}
+        <!-- course filter code start -->
+          <div class="pt_course_f section-category">
+            <div class="rte" data-rte="">
+              <!-- <label class="rad_h6 label no-js-hidden products-accreditation-button" for="products-accreditation-button">Show Accreditation</label> -->
+              <select id="i_state" name="i_state" class="p_state rad_h6 discipline">
+                <option value="" selected="" >Choose State*</option>
+                {% assign first_drop = section.settings.collection_first_tree %}
+                {% for link in first_drop.links -%}
+                  {% assign title_handle = link.title | handleize %}
+                  <option {% if title_handle == c_state %}selected="selected"{% endif %} data-handle="{{ link.title | handleize }}" value="{{ link.title | handleize }}">{{ link.title }}</option>
+                {% endfor %}
+              </select>
+  
+              <select id="idiscipline" name="idiscipline" class="p_discipline rad_h6 discipline">
+                <option value="" selected="">Choose Discipline*</option>
+                {% for link in first_drop.links -%}
+                  {%- for childlink in link.links -%}
+                    <option
+                      {% if childlink.title == collection.metafields.colibri.discipline %}selected="selected"{% endif %} 
+                      value="{{ childlink.url | remove:"/" }}"
+                    >
+                      {{ childlink.title }}
+                    </option>
+                  {% endfor %}
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+        <!-- course filter code start -->
+      {% endif %}
+      </div>
+    </div>
+  </pop-up>
+</section>
+
+<script>
+function closeModal(){
+  document.body.style.top = '';
+  document.body.classList.remove('fixed');
+  document.body.querySelector('.shopify-section.collection_popup.cc-pop-up').classList.remove('fixed');
+  document.body.querySelector('.popup-section').removeAttribute('open');
+  window.pauseAllMedia();
+  document.body.querySelector('.popup-section').removeEventListener('keyup', this.keyupHandler);
+}
+function openModal(){
+  document.body.style.top = '0px';
+  document.body.classList.add('fixed');
+  document.body.querySelector('.shopify-section.collection_popup.cc-pop-up').classList.add('fixed');
+  document.body.querySelector('.popup-section').setAttribute('open','');
+}
+$(document).ready(function(){ 
+  var storedState = localStorage.getItem('selectedState');
+  var storedDiscipline = localStorage.getItem('selectedDiscipline');
+  if (storedState) {
+    $('#i_state').val(storedState.toLowerCase()).change();
+    $('.p_state').val(storedState).change();
+  }
+  if (storedDiscipline) {
+    $('#idiscipline, .p_discipline').val(storedDiscipline).change();
+  }
+  if(storedState && storedDiscipline){
+    const event = new Event('change');
+    document.querySelector("#idiscipline").dispatchEvent(event);
+    // setTimeout(() => closeModal(), 1000);
+  }else{
+    openModal();
+  }
+  $('.p_state, .p_discipline').change(function() {
+    var state_selected = $('.p_state :selected').attr('value');
+    var disc_selected = $('.p_discipline :selected').attr('value');
+    localStorage.setItem('selectedState', state_selected);
+    localStorage.setItem('selectedDiscipline', disc_selected);
+    if (state_selected) {
+      $('#i_state').val(state_selected.toLowerCase()).change();
+    }
+    if (disc_selected) {
+      $('#idiscipline').val(disc_selected).change();
+    }
+    if(state_selected && disc_selected){
+      closeModal();
+      const event = new Event('change');
+      document.querySelector("#idiscipline").dispatchEvent(event);
+    }
+  });
+});
+</script>

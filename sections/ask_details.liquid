@@ -1,0 +1,224 @@
+<div class="section section--full-width ">
+  <div class="mb-5">
+    <a class="back_all" href="/pages/ask-the-experts">Back To All</a>
+  </div>
+  <div class="ask_inner">
+    <div class="ask_heading">
+      <h4 class="rad_h5 disclosure__title xs:regular-text h6 font-body flex flex-auto items-center mb-0 text-current">
+        <span class="que_icon rad_h2">
+          Q
+          <div>|</div>
+        </span>
+        {{ metaobject.question }}
+      </h4>
+      <div class="ask_answer rte">
+        <span class="ans_a">A:</span>
+        {{ metaobject.answer }}
+      </div>
+    </div>
+  </div>
+  <!-- author code start -->
+  {{ 'media-with-text.css' | asset_url | stylesheet_tag }}
+  {% if metaobject.author.value != blank %}
+  <div class="media-with-icon-text media-with-text">
+    <h2
+      class="rad_h3 author_h"
+    >
+      About the author
+    </h2>
+    {% assign author_val = metaobject.author.value %}
+    {% if author_val.photo_url != blank %}
+      <div class="media-with-text__media relative flex flex-col justify-center overflow-hidden">
+        <div class="media w-full relative">
+          <img src="{{ author_val.photo_url }}" alt="{{ author_val.name }}" />
+        </div>
+      </div>        
+    {% elsif author_val.photo != blank %}
+      <div class="media-with-text__media relative flex flex-col justify-center overflow-hidden">
+        <div class="media w-full relative">
+          <img src="{{ author_val.photo | img_url:'400x' }}" alt="{{ author_val.name }}">
+        </div>
+      </div>
+    {% else %}
+      <div class="media-with-text__media relative flex flex-col justify-center overflow-hidden">
+        <div class="media w-full relative">
+          {{ 'image' | placeholder_svg_tag: 'media__placeholder dark' }}
+        </div>
+      </div>
+    {% endif %}
+    <div class="media-with-text__text flex flex-col justify-center ">
+      <h2 class="author_heading rad_h4 mb-5">{{ author_val.name }}</h2>
+      <div class="rad_h6 author_content">
+        {{ author_val.bio | strip_html | truncatewords: 45 }}
+        <a href="{{ author_val.system.url }}" class="see_ans link-orange">Read More</a>
+      </div>
+    </div>
+  </div>
+  {% endif %}  
+  <!-- author code end -->
+  <!-- table code start -->
+  {% assign prs = author_val.product_list.value %}
+  {% if prs != blank %}
+    <div class="catalog-table">
+      <h2 class="rad_h5 h4 section__heading">Courses from this Author</h2>
+      <div class="table-header">
+        <ul>
+          <li class="module-name wid-35 rad_h6">Course Title</li>
+          <li class="format wid-10 rad_h6">Format</li>
+          {% comment %}<li class="preview wid-10 rad_h6">Preview</li>{% endcomment %}
+          <li class="hours wid-10 rad_h6">Hours</li>
+          <li class="price wid-180 rad_h6">
+            <div>Online/Mail Price</div>
+          </li>
+          <li class="action wid-180 rad_h6">
+            <div>Online/Mail</div>
+          </li>
+        </ul>
+      </div>
+      <div id="post-564345" class="course-info no-promo">
+        {% for pr in prs %}
+          {% if pr != blank %}
+            <ul class="catalog-list" data-state="" data-category="">
+              <li class="rad_h6 module-name wid-35">
+                <div>
+                  <a href="{{ pr.url }}">
+                    {{- pr.title }}
+                  </a>
+                  {% if pr.metafields.colibri.course_format != blank %}
+                    <div class="mob_show">Format: {{ pr.metafields.colibri.course_format }}</div>
+                  {% endif %}
+                </div>
+              </li>
+              <li class="rad_h6 format wid-10">
+                <div class="catalog-format-container">
+                  {{ pr.metafields.colibri.course_format }}
+                </div>
+              </li>
+              {% comment %}
+              <li class="rad_h6 preview wid-10">
+                {% render 'preview-course-button', settings: settings, product: product, product_url:pr.url, section_id: section.id, product_not_for_sale: product_not_for_sale  %}
+              </li>
+              {% endcomment %}
+              <li class="rad_h6 hours wid-10">
+                <div><span class="510_show">Hours:</span> 1</div>
+              </li>
+              <li class="price catalog-course wid-180">
+                <div class="price price--top">
+                  <div class="price__default">
+                    <span class="price__from">From</span>
+                    <strong class="rad_36 price__current">{% for variant in pr.variants %}{{ variant.price | money | remove:".00" }}{% unless forloop.last %} / {% endunless %}{% endfor %} </strong>
+                    <s class="rad_h5 price__was"></s>
+                  </div>
+                </div
+              </li>
+              <li class="rad_h6 action wid-180">
+                {% render 'preview-course-button', settings: settings, product: product, product_url:pr.url, section_id: section.id, product_not_for_sale: product_not_for_sale  %}
+              </li>
+            </ul>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+{% comment %}
+<script src="{{ 'course-drawer.js' | asset_url }}" defer="defer"></script>
+
+<course-drawer
+  data-c_id="{{ product.id }}"
+  class="drawer drawer--course drawer--cart fixed top-0 right-0 flex flex-col w-full has-motion"
+  data-name="course-drawer"
+  id="course-drawer"
+  role="dialog"
+  aria-label="Your cart"
+  aria-modal="true"
+  aria-hidden="false"
+  tabindex="-1"
+  data-shipping-calculator="false"
+>
+  <header class="pad_l_r line_height drawer__header flex justify-between items-center">
+    <h2 class="h5 mb-0">Quick View</h2>
+    <div class="flex items-center gap-x-theme">
+      <button type="button" class="drawer__close-btn js-close-drawer">
+        <span class="visually-hidden">Close</span>
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="1.5"
+          fill="none"
+          fill-rule="evenodd"
+          stroke-linejoin="round"
+          aria-hidden="true"
+          focusable="false"
+          role="presentation"
+          class="icon"
+        >
+          <path d="M5 19 19 5M5 5l14 14"></path>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="course-drawer__content drawer__content drawer__content--flex flex-auto items-center">
+    {% for product in prs %}
+      <div
+        class="pad_l_r top_pro grow flex items-center {% unless forloop.first %}hidden{% endunless %}"
+        data-pid="{{ product.id }}"
+      >
+        <h2 class="h4 section__heading mb-0 flex-auto text-left align-self-start">
+          {{ product.title }}
+        </h2>
+        <hr class="course_hr">
+        <div class="c_info align-self-start">
+          <div class="hours_review">
+            <span class="pro_hours">
+              {% if product.metafields.colibri.contact_hours != blank
+                and product.metafields.colibri.course_format != blank
+              -%}
+                {{- product.metafields.colibri.contact_hours }} Hours
+              {%- endif -%}
+            </span>
+            <span class="card_star"
+              >★★★★★
+              <div class="star_num">(2)</div>
+            </span>
+            {% if product.metafields.colibri.instructional_level != blank %}
+              <span class="ins">Instructional Level: {{ product.metafields.colibri.instructional_level }}</span>
+            {% endif %}
+          </div>
+          <div class="icon_txt">
+            <img src="//homeceuconnection.myshopify.com/cdn/shop/t/3/assets/pro_icon.png?v=89573586325803192451710152450"
+            ><span>Text</span>
+          </div>
+        </div>
+        <div class="c_acc_cart product-info__block_member">
+          {%- render 'price', product: product, class: 'price--top' -%}
+          {% render 'add_custom', product: product, section: section %}
+        </div>
+        {% if product.description != blank %}
+          <div class="rte c_description">
+            <a href="{{ product.url }}">
+              <span class="orange_txt">Full Course Description</span>
+            </a>
+            <div class="inn_desc">
+              {{ product.description | truncatewords: 75 }}
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+  <div class="course-drawer__summary relative drawer__footer course-drawer--checkout--sticky-true"></div>
+  <div class="overlay overlay--drawer absolute top-0 right-0 bottom-0 left-0 js-close"></div>
+</course-drawer>
+{% endcomment %}
+{% schema %}
+{
+  "name": "Ask Details",
+  "class": "ask_details",
+  "settings": []
+}
+{% endschema %}

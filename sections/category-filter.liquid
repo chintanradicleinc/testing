@@ -1,0 +1,122 @@
+<div class="container">
+  
+    <div class="section-category">
+        <div class="rte" data-rte="">  
+            <select class="rad_h6" id="iFunction" name="iFunction">
+              {% assign variable = 0 %}
+             {% assign first_drop = section.settings.collection_first_tree %}
+               <option value="-1" selected="">Choose State*</option>
+                {% for link in first_drop.links -%}
+                  {% assign variable = variable | plus: 1 %}
+                  <option value="{{ variable }}">{{ link.title }}</option>
+               {% endfor %}
+            </select>
+          <script>
+            $(document).ready(function(){ 
+              $('#button1').click(function(){ 
+                var state_selected = $('#iFunction :selected').text();
+                var state_add = '-' + state_selected;
+                var state_low = state_add.toLowerCase();
+                var disc_selectedd = $('#iOperation  :selected').text();
+                var disc_repl = disc_selectedd.replace('/', '-')
+                var disc_low = disc_repl.toLowerCase();
+                var collection_info =  disc_low + state_low;
+                var final_data = "";
+
+                {% for collection in product.collections %}
+                  
+                  {% assign colle = collection.handle %} 
+                  var colle_handle = {{ colle | json }}
+                    
+                 if (collection_info === colle_handle){
+                    
+                    {%- for accred in product.metafields.colibri.accreditation.value -%}   
+                      
+                       var protest = {{ accred.name | json }}
+                       var discipline = {{ accred.license_group.name | json }}  
+                       var state = {{ accred.state.name | json }}
+                       var providerCode = {{ accred.code | json }}  
+                       var expiryCompare = {{ accred.expires_on | json }} 
+                       console.log(expiryCompare);  
+                        console.log(discipline);
+                      console.log(state);
+                        {% assign noTime = accred.expires_on | split: 'T' %}
+                        var expiry = {{ noTime[0] | json }}
+                       var state_selected = $('#iFunction :selected').text();
+
+                      // Current date code
+
+                      var currentDate = new Date().getTime() / 1000;
+
+
+                      var date = new Date(expiryCompare);
+                      var expirySeconds = date.getTime() / 1000;
+                      
+                       if(state_selected === state && currentDate < expirySeconds && discipline === disc_selectedd){
+                           final_data = '<table class="table-filter"><thead><tr><th>STATE</th><th>DISCIPLINE</th><th>APPROVAL STATUS</th><th>PROVIDER CODE</th><th>EXPIRATION DATE</th></tr></thead><tbody><tr><td>' + state + '</td><td>' + discipline + '</td><td>' + protest + '</td><td>' + providerCode + '</td><td>' + expiry + '</td></tbody></table>';
+                          // document.getElementById("output").innerHTML ='<table class="table-filter"><thead><tr><th>STATE</th><th>DISCIPLINE</th><th>APPROVAL STATUS</th><th>PROVIDER CODE</th><th>EXPIRATION DATE</th></tr></thead><tbody><tr><td>' + state + '</td><td>' + discipline + '</td><td>' + protest + '</td><td>' + providerCode + '</td><td>' + expiry + '</td></tbody></table>';
+                       }else{}   
+                      
+                    {%- endfor -%}   
+                    
+                }else{   
+                  // document.getElementById("output").innerHTML = 'Accreditation information is not available';  
+                }
+                  
+                {% endfor %} 
+                if(final_data != ""){
+                  document.getElementById("output").innerHTML = final_data;
+                }else{
+                  document.getElementById("output").innerHTML = 'Accreditation information is not available';  
+                }
+ 
+              });
+              });
+            </script>
+            <select id="iOperation" class="rad_h6" name="iOperation" onchange="javascript:handleSelect(this)" disabled="">
+                <option value="" selected="">Choose Discipline*</option>
+              {% for link in first_drop.links -%}
+                  {%- for childlink in link.links -%}
+                <option value="{{ demolink | replace: ' ', '-'}}{{ childlink.url }}">{{ childlink.title }}</option>
+                 {% endfor %}   
+              {% endfor %}
+            </select>
+        <button id="button1" class="button-primary featured-collection__button mdc-ripple-surface mdc-ripple-upgraded">{{ section.settings.category_btn_text }}</button>
+        <div id="output"></div>
+      </div>
+    </div>
+</div>
+
+ {%  schema %} 
+ {
+    "name": "Category Filter",
+    "tag": "section",
+    "settings": [
+    {
+       "type": "link_list",
+       "id": "collection_first_tree",
+       "label": "Select first dropdown menu",
+       "info": "This will populate all the links of selected menu."
+    },
+    {
+       "type": "link_list",
+       "id": "collection_second_tree",
+       "label": "Select second dropdown menu",
+       "info": "This will populate all the links of selected menu."
+    },
+    {
+        "type": "text",
+       "id": "category_btn_text",
+       "label": "Enter button text"
+    }
+    ],
+    "presets": [
+        {
+           "name": "Category Filter" 
+        }
+    ],
+    "enabled_on": {
+        "templates": ["product"]
+    }
+ }
+{% endschema %}

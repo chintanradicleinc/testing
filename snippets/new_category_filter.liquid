@@ -1,0 +1,43 @@
+{% if collection.metafields.colibri.state == blank and collection.metafields.colibri.discipline == blank %}
+  {% assign cart_state = '' %}
+  {% assign cart_discipline = '' %}
+  {% for item in cart.items %}
+    {% if forloop.first %}
+      {%- for property in item.properties -%}
+        {% if property.first contains '_admin_state' %}
+          {% assign cart_state = property.last %}
+        {% endif %}
+        {% if property.first contains '_admin_discipline' %}
+          {% assign cart_discipline = property.last %}
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+    {% break %}
+  {% endfor %}
+{% endif %}
+<div class="section-category">
+  <!--
+    <h2 class="disclosure__title product-info__disclosure font-body font-bold text-body flex flex-auto items-center mb-0">
+      Select State
+    </h2>
+  -->
+  <legend class="label rad_16 label_state">Select State</legend>
+
+  <div class="rte" data-rte="">
+    <select id="iFunction_2" class="rad_h6" name="iFunction_2"  required>
+      {% assign first_drop = section.settings.collection_first_tree %}
+      <option value="">Select State*</option>
+      {% for link in first_drop.links -%}
+        <option value="{{ link.title }}" {% if collection.metafields.colibri.state == link.title or state == link.title or cart_state == link.title %}selected="selected"{% endif %}>{{ link.title }}</option>
+      {% endfor %}
+    </select>
+    <legend class="label rad_16 select_2 label_discipline">Select Discipline</legend>
+    <select id="iOperation_2" class="rad_h6 {% if collection.metafields.colibri.state != blank %}not_empty{% endif %}" name="iOperation_2" required>
+      <option value="">Select Discipline*</option>
+      {% for childlink in linklists['product-discipline-list'].links -%}
+        {% assign value = childlink.url | remove:"/" %}
+        <option value="{{ value }}" {% if collection.metafields.colibri.discipline == childlink.title or discipline == value or cart_discipline == value %}selected="selected"{% endif %}>{{ childlink.title }}</option>
+      {% endfor %}
+    </select>
+  </div>
+</div>

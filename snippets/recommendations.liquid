@@ -1,0 +1,247 @@
+{%- comment -%}
+  Parameters:
+  - is_cart {Boolean} - Recommendations are for the cart contents.
+  - intent {Boolean} - Recommendations intent - 'related' or 'complementary' (optional, default is 'related').
+  - products_to_show {Number} - Maximum number of products to show.
+  - heading {String} - Heading for the recommendations (optional).
+  - heading_align {String} - Heading alignment
+  - layout {String} - Layout for the cards - 'carousel' or 'grid' (optional, default is 'carousel').
+  - grid_classes {String} - Classes for the products grid
+  - always_open_quickbuy {Boolean} - If true, when a product only has a default variant the quickbuy drawer will still
+      open and not be directly added to cart
+
+  Usage:
+  {% render 'recommendations',
+    intent: 'complementary',
+    products_to_show: section.settings.products_to_show,
+    heading: section.settings.heading,
+    heading_align: 'text-start',
+    grid_classes: 'grid grid-cols-1 gap-y-4'
+  %}
+{%- endcomment -%}
+
+{%- if section.index > 2 -%}
+  <link rel="stylesheet" href="{{ 'product.css' | asset_url }}" media="print" onload="this.media='all'">
+{%- else -%}
+  {{ 'product.css' | asset_url | stylesheet_tag }}
+{%- endif -%}
+
+{%- liquid
+  unless intent
+    assign intent = 'related'
+  endunless
+
+  if layout == 'carousel' or layout == nil
+    assign carousel = true
+  else
+    assign carousel = false
+  endif
+
+  if is_cart
+    # Fetch 4 extra in case a recommended product is already in the cart, and therefore not shown.
+    assign limit = products_to_show | plus: 4
+    assign product_id = cart.items.first.product_id
+  else
+    assign limit = products_to_show
+    assign product_id = product.id
+  endif
+-%}
+
+{%- assign is_in_cart = "" -%}
+{%- assign has_bundle = false -%}
+{%- for item in cart.items -%}
+  {%- if item.product.template_suffix contains "bundle" or item.product.type contains "bundle" or item.product.template_suffix contains "membership" or item.product.type contains "membership" -%}
+    {%- assign has_bundle = true -%}
+  {%- endif -%}
+  {%- if is_in_cart != "" -%}
+    {%- assign is_in_cart = is_in_cart | append: "," -%}
+  {%- endif -%}
+  {%- assign is_in_cart = is_in_cart | append: item.product.id -%}
+{%- endfor -%}
+{%- unless has_bundle == true -%}
+<product-recommendations class="block{% if is_cart %} cart-recommendations{% endif %}"{% if is_cart %} id="cart-recommendations"{% endif %} data-url="{{ routes.product_recommendations_url }}?section_id={{ section.id }}&product_id={{ product_id }}&limit={{ limit }}&intent={{ intent }}" data-product-id="{{ product_id }}">
+  {%- if recommendations.performed and recommendations.products_count > 0 -%}
+    {%- if heading != blank and carousel == false -%}
+      <h2 class="h6{% if heading_align %} {{ heading_align }}{% endif %}">{{ heading | escape }}</h2>
+    {%- endif -%}
+
+    {%- if carousel -%}
+      <carousel-slider class="carousel block" inactive>
+
+        <div class="pad_l_r flex items-center justify-between">
+          {%- if heading != blank -%}
+            <h2 class="rad_h6 flex-auto mb-0 h6 max-w-full{% if heading_align %} {{ heading_align }}{% endif %}">{{- heading | escape -}}</h2>
+          {%- endif -%}
+             <div class="democoll">{{ collection_handle_url }}</div>
+          <div class="slider-nav slide-nav--inline flex no-js-hidden">
+            <button type="button" class="slider-nav__btn tap-target btn has-ltr-icon" name="prev" aria-controls="slider-{{ section.id }}">
+              <span class="visually-hidden">{{ 'general.slider.previous' | t }}</span>
+              {% render 'icon-chevron-left' %}
+            </button>
+            <button type="button" class="slider-nav__btn slider-nav__btn--offset tap-target btn has-ltr-icon" name="next" aria-controls="slider-{{ section.id }}">
+              <span class="visually-hidden">{{ 'general.slider.next' | t }}</span>
+              {% render 'icon-chevron-right' %}
+            </button>
+          </div>
+        </div>
+
+        <div class="pad_l_r relative">
+          <div class="slider slider--no-scrollbar" id="slider-{{ section.id }}">
+    {%- endif -%}
+
+    <ul
+      class="{% if carousel %}slider__grid {% endif %}{{ grid_classes }}{% if settings.card_contain %} small__grid{% endif %}"
+      role="list"
+    >
+      {% assign lastCartItem = cart.items | first %}
+      {% if lastCartItem %}
+        {%- for property in lastCartItem.properties -%}
+          {% if property.first contains '_current_collection' %}
+            {% assign collection = collections[property.last] %}
+            {% if collection %}
+              {% assign count = 1 %}
+              {%- for product in collection.products -%}
+                {%- unless product.template_suffix contains "membership" or is_in_cart contains product.id -%}
+                  <li {% if carousel %} class="slider__item" {% endif %}>
+                    <div class="pad_l_r box_pro">
+                      <h2 class="rad_18 pro_heading h4 section__heading mb-0 flex-auto text-left">
+                        {{ product.title }}
+                      </h2>
+                      <div class="price_box">
+                        {% if block.settings.m_text != blank %}
+                          <p class="rad_h6 h6 sub-heading-font mb-0 flex-auto text-center">
+                            {{ block.settings.m_text }}
+                          </p>
+                        {% endif %}
+                        <div class="product-info__block_member">
+                          <div class="price price--on-sale">
+                            <div class="price__default">
+                              <strong class="small_f rad_h6 price__current">{{ product.price | money }} </strong>
+                              {% if product.price < product.compare_at_price %}
+                                <s class="small_f rad_h6 price__was">{{ product.compare_at_price | money }}</s>
+                              {% endif %}
+                            </div>
+                          </div>
+                          {% assign product_url = product.url %}
+                          {% render 'preview-course-button',
+                            settings: settings,
+                            product: product,
+                            product_url: product_url,
+                            section_id: section.id,
+                            product_not_for_sale: false
+                          %}
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+                  {% if count >= 4 %}
+                    {% break %}
+                  {% endif %}
+                  {% assign count = count | plus:1 %}
+                {%- endunless -%}
+                {% comment %}
+                  <li
+                    {% if carousel %}
+                      class="slider__item"
+                    {% endif %}
+                  >
+                    <div class="pad_l_r box_pro">
+                      <h2 class="rad_18 pro_heading h4 section__heading mb-0 flex-auto text-left">
+                        {{ product.title }}
+                      </h2>
+                      <div class="price_box">
+                        {% if block.settings.m_text != blank %}
+                          <p class="rad_h6 h6 sub-heading-font mb-0 flex-auto text-center">
+                            {{ block.settings.m_text }}
+                          </p>
+                        {% endif %}
+
+                        <div class="product-info__block_member">
+                          <div class="price price--on-sale">
+                            <div class="price__default">
+                              <strong class="small_f rad_h6 price__current">{{ product.price | money }} </strong>
+                              {% if product.price < product.compare_at_price %}
+                                <s class="small_f rad_h6 price__was">{{ product.compare_at_price | money }}</s>
+                              {% endif %}
+                            </div>
+                          </div>
+                          <product-form class="product_cart_add">
+                            {% assign product_form_id = 'product-form-' | append: product.id | append: section.id %}
+                            {% form 'product', product, class: 'cart-form', id: product_form_id %}
+                              <select name="id" style="display: none">
+                                {% for variant in product.variants %}
+                                  <option value="{{ variant.id }}"></option>
+                                {% endfor %}
+                              </select>
+                              <input
+                                type="hidden"
+                                class="qty-input__input input"
+                                id="quantity-quickadd"
+                                name="quantity"
+                                value="1"
+                              >
+                              {% assign incart = false %}
+                              {% for item in cart.items %}
+                                {% if item.product.id == product.id %}
+                                  {% assign incart = true %}
+                                {% endif %}
+                              {% endfor %}
+                              <button
+                                type="submit"
+                                data-add-to-cart-text="Add to cart"
+                                name="add"
+                                class="rad_h6 left-sidebar-prod-btn {% if incart == true %}btn--cyan dis_btn{% endif %}"
+                                data-product_id="{{ product.id }}"
+                              >
+                                {% if product.template_suffix contains 'package-products'
+                                  or product.template_suffix contains 'pre-define-bundle'
+                                -%}
+                                  Choose Options
+                                {%- else -%}
+                                  {%- if incart == true -%}
+                                    In Cart
+                                  {%- else -%}
+                                    Add to Cart
+                                  {%- endif -%}
+                                {%- endif %}
+                              </button>
+                              <input type="hidden" id="_education_type" name="properties[_education_type]" value="CE">
+                              <input type="hidden" id="_state" name="properties[_state]" value="alabama">
+                              <input type="hidden" id="_discipline" name="properties[_discipline]" value="pt">
+                            {% endform %}
+                          </product-form>
+
+                          <script type="application/json" id="custom-product-json">
+                            {
+                              {%- for variant in product.variants -%}
+                              "{{- variant.id -}}": {
+                                "profession" : {% if product.metafields.colibri.profession != blank %}{{- product.metafields.colibri.profession -}}{% else %}{}{% endif %},
+                                "bundle_hours" : {% if variant.metafields.colibri.bundle_hours != blank %}{{- variant.metafields.colibri.bundle_hours -}}{% else %}{}{% endif %},
+                                "current_collection": "{{ collection.handle }}",
+                                "extension_duration": "{% if variant.metafields.colibri.webinar_course_hours %}{{- variant.metafields.colibri.extension_duration -}}{% endif %}",
+                                "contact_hours": "{{- variant.metafields.colibri.contact_hours -}}",
+                                "delivery_method": "{{- variant.metafields.colibri.delivery_method -}}"
+                              }{% unless forloop.last %},{% endunless %}
+                              {%- endfor -%}
+                            }
+                          </script>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+                {% endcomment %}
+              {%- endfor -%}
+            {% endif %}
+          {% endif %}
+        {%- endfor -%}
+      {% endif %}
+    </ul>
+
+    {%- if carousel -%}
+          </div>
+        </div>
+      </carousel-slider>
+    {%- endif -%}
+  {%- endif -%}
+</product-recommendations>
+{%- endunless -%}
