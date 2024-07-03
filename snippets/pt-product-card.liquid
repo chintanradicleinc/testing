@@ -137,10 +137,22 @@
                   {% assign diffDays_r = diffSeconds_r | divided_by: 3600 | divided_by: 24 %}
 
                   {% if product.metafields.colibri.release_date != blank %}
-                    {% if diffDays_r <= 90 and diffDays_r > 0 %}
-                      <span class="tag new">NEW</span>
-                    {% endif %}
+                    <!-- new code start -->
+                    {% unless product.metafields.colibri.course_format contains "webinar" or product.metafields.colibri.course_format contains "Webinar" %}
+                      {% if diffDays_r <= 60 and diffDays_r > 0 %}
+                        <span class="tag new">NEW</span>
+                      {% endif %}
+                    {% endunless %} 
+                    <!-- new code end -->
                   {% endif %}
+                    {% if product.metafields.colibri.course_indicator != blank %}
+                      {% assign mandatory_val = collection.metafields.colibri.discipline | handleize | append: '-' | append: collection.metafields.colibri.state | downcase %}
+                      {% for c_indicator in product.metafields.colibri.course_indicator.value %}
+                        {% if c_indicator == mandatory_val %}
+                          <span class="tag new tag_2">Mandatory</span>
+                        {% endif %}  
+                      {% endfor %}  
+                    {% endif %}  
 
                   {% if product.metafields.colibri.education_type != blank and product.price == 0 %}
                     <span class="tag">{{ product.metafields.colibri.education_type }}</span>

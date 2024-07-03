@@ -261,6 +261,7 @@ if (!customElements.get('cart-drawer')) {
      * @returns {Array}
      */
     getSectionsToRender() {
+      console.log("getSectionsToRender")
       return [
         {
           id: 'cart-drawer',

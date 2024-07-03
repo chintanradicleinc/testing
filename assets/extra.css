@@ -3180,18 +3180,130 @@ cart-drawer .slider {
 .tap-target.cart-item__remove:after{
   content: unset;
 }
-.collection-banner__count{
-  display: inline-block;
-}
 facet-filters details-disclosure .filter__content li.js-hidden {
   display: none !important;
 }
-.wallet-cart-button-container, .wallet-cart-button{
-  width: 100% !important;
-  height: 48px !important;
-  max-width: unset !important;
+@media(min-width: 1024px){
+  body.overlay-predictive-search{
+    overflow: unset !important;
+  }
 }
-.wallet-cart-grid{
-  width: 100% !important;
-  max-width: unset !important; 
+.predictive-search__results .tablist__tab[aria-selected=true],
+button.predictive-search__view-all.link.js-search-link {
+    color: #175B86;
 }
+.collection-banner__count{
+  display: inline-block;
+}
+/* a.main-nav__item:not([href="#"]) {
+  text-decoration: underline;
+} */
+
+.u-userLauncherColor:not([disabled]) {
+  background-color: #000 !important;
+}
+
+/* new css start */
+.tag.tag_2 {
+    right: -27px;
+    width: 110px;
+    top: 24px;
+    background: #f77d29 !important;
+}
+quick-add-drawer span.tag.new.tag_2 {
+    font-size: 10px !important;
+    line-height: normal;
+    padding: 3px 5px 4px 5px;
+    font-weight: 600;
+    color: #fff;
+    position: relative;
+    top: 0;
+    left: 0;
+    border-radius: 5px;
+}
+.top_pro .section__heading.pad_top {
+    padding-top: 10px;
+}
+.tooltip {
+  cursor: pointer;
+  vertical-align: middle;
+  height: 22px;
+  position: relative;
+  display: inline-block;
+  padding: 0px;
+  margin: -10px 0 -10px 0px;
+}
+.tooltip svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* CSS Triangles - see Trevor's post */
+.tooltip .info {
+  background: #333;
+  bottom: 100%;
+  color: #fff;
+  display: block;
+  left: -10% !important;
+  margin-bottom: 5px;
+  opacity: 0;
+  padding: 10px;
+  pointer-events: none;
+  position: absolute;
+  font-size: 12px;
+  width: 220px;
+  text-align: center;
+  border-radius: 5px;
+  -webkit-transform: translateY(10px);
+  -moz-transform: translateY(10px);
+  -ms-transform: translateY(10px);
+  -o-transform: translateY(10px);
+  transform: translateY(10px);
+  -webkit-transition: all .25s ease-out;
+  -moz-transition: all .25s ease-out;
+  -ms-transition: all .25s ease-out;
+  -o-transition: all .25s ease-out;
+  transition: all .25s ease-out;
+  -webkit-box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.28);
+  -moz-box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.28);
+  -ms-box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.28);
+  -o-box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.28);
+  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.28);
+  transform: translate(-50%, -.5em) !important;
+}
+.tooltip .info a{
+  color: #f77d29;
+}
+.tooltip .info:after {
+  border-left: solid transparent 10px;
+  border-right: solid transparent 10px;
+  border-top: solid #333 10px;
+  bottom: -10px;
+  content: " ";
+  height: 0;
+  left: 50%;
+  margin-left: 1px;
+  position: absolute;
+  width: 0;
+}
+.tooltip:hover .info {
+  opacity: 1;
+  pointer-events: auto;
+  -webkit-transform: translateY(0px);
+    -moz-transform: translateY(0px);
+    -ms-transform: translateY(0px);
+     -o-transform: translateY(0px);
+      transform: translateY(0px);
+}
+.tooltip .info:not(:hover) {
+  visibility: hidden;
+  opacity: 0;
+  z-index: -1;
+  transition: all 2s ease-out;
+}
+.tooltip:hover .info {
+  visibility: visible;
+  opacity: 1;
+  z-index: 99999;
+}
+/* new css end */

@@ -248,9 +248,9 @@
               <label class="rad_h6 label no-js-hidden products-accreditation-button" for="products-accreditation-button">{{ label }}</label>
               <select id="products-sort-by" name="sort_by" class="rad_h6 discipline">
                 <option value="title-ascending" selected="selected">Alpha A-Z</option>
-                <option value="title-descending">Alplha Z-A</option>
-                <!-- <option value="created-descending">Date New to Old</option>
-                <option value="created-ascending">Date Old to New</option> -->
+                <option value="title-descending">Alpha Z-A</option>
+                <option value="created-descending">Date New to Old</option>
+                <option value="created-ascending">Date Old to New</option>
                 <option value="price-ascending">Price, Low to High</option>
                 <option value="price-descending">Price, High to Low</option> 
                 <option value="manual">Featured</option>
@@ -303,12 +303,18 @@
         </div>
         <input class="promo_code filter_search_input" value="" type="search" name="promo_codes" />
       </div>
+      <!-- keywords tooltip code start -->
       <div class="filter_search">
         <div class="search_heading rad_h6">
           Keyword Search
+          <span class="tooltip" onclick="void(0);">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="512" height="512"><g id="_01_align_center" data-name="01 align center"><path d="M12,24A12,12,0,1,1,24,12,12.013,12.013,0,0,1,12,24ZM12,2A10,10,0,1,0,22,12,10.011,10.011,0,0,0,12,2Z"/><path d="M14,19H12V12H10V10h2a2,2,0,0,1,2,2Z"/><circle cx="12" cy="6.5" r="1.5"/></g></svg>
+            <span class="info"><a href="https://help.shopify.com/en/manual/online-store/storefront-search" target="_blank">Click here</a> for more information!</span>
+          </span>
         </div>
         <input class="keyword_search filter_search_input" value="{% if template contains 'search' %}{{ search.terms }}{% endif %}" type="search" name="q"/>
       </div>
+      <!-- keywords tooltip code end -->
 
       <div class="facets__filters">
         {%- capture mobile_sort_by -%}
@@ -405,6 +411,29 @@
                     {%- for value in sorted_values  -%}
                       {%- if value.count > 0 or section.settings.show_filter_deadends -%}
                         {%- assign selectable_filter_count = selectable_filter_count | plus: 1 -%}
+                        {% assign mandatory_val = collection.metafields.colibri.discipline | handleize | append: '-' | append: collection.metafields.colibri.state | downcase %}
+                        {% if filter.label == "Course Indicator" %}
+                          {% if value.label == mandatory_val %}
+                        <li{% if value.count == 0 and value.active == false %} class="js-hidden"{% endif %}>
+                          <input type="checkbox"
+                                 class="{% unless swatches %}checkbox {% endunless %}visually-hidden focus-label-before"
+                                 id="filter-{{ filter.param_name | escape }}-{{ forloop.index }}"
+                                 name="{{ value.param_name }}"
+                                 value="{{ value.value | escape }}"
+                                 {% if value.active %}checked{% endif %}
+                            {% if value.count == 0 and value.active == false %}disabled{% endif %}>
+                          <label for="filter-{{ filter.param_name | escape }}-{{ forloop.index }}"
+                                 class="rad_h6 filter__label flex items-start w-full m-0"
+                          {%- if swatches %} data-swatch="{{ value.label | replace: '"', '' | downcase }}"{% endif %}>
+                            <span class="flex-auto">Mandatory</span>
+                            {% if section.settings.show_filter_counts -%}
+                              <span class="filter__count">({{ value.count }})</span>
+                            {%- endif -%}
+                          </label>
+                        </li>
+                            {% endif %}
+                          {% else %}
+                         
                         <li{% if value.count == 0 and value.active == false %} class="js-hidden"{% endif %}>
                           <input type="checkbox"
                                  class="{% unless swatches %}checkbox {% endunless %}visually-hidden focus-label-before"
@@ -422,6 +451,7 @@
                             {%- endif -%}
                           </label>
                         </li>
+                            {% endif %}
                       {%- endif -%}
                     {%- endfor -%}
                 </ul>

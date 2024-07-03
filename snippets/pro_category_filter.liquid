@@ -1,7 +1,6 @@
 <button onclick="toggleBox()" class="rad_h6 section_category_button2 mobile-only">
   Accreditation Information
-                    <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false" role="presentation" class="icon"><path d="M20 8.5 12.5 16 5 8.5" stroke="currentColor" stroke-width="1.5" fill="none"></path></svg>
-
+  <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false" role="presentation" class="icon"><path d="M20 8.5 12.5 16 5 8.5" stroke="currentColor" stroke-width="1.5" fill="none"></path></svg>
 </button>
   <div class="section-category is-fixed">
     <div class="flex items-center gap-x-theme mb-5">
@@ -29,7 +28,8 @@
       </button>
     </div>
         <div class="rte" data-rte="">  
-            <select id="iFunction" name="iFunction" onchange="changeddl(this)">
+            <!-- onchange="changeddl(this)" -->
+            <select id="iFunction" name="iFunction">
               {% assign variable = 0 %}
              {% assign first_drop = block.settings.collection_first_tree %}
               {% if collection.metafields.colibri.select_state == blank %}
@@ -45,7 +45,8 @@
               $('.js-product .section-category').toggleClass('open');
             }
             $(document).ready(function(){ 
-              $('#button1').click(function(){ 
+              $('#button1').click(function(){
+                console.log("I am called");
                 var state_selected = $('.left_extra #iFunction :selected').text();
                 var state_add = '-' + state_selected;
                 var state_low = state_add.toLowerCase();
@@ -78,13 +79,23 @@
                       var expirySeconds = date.getTime() / 1000;
                      {% for discipline_child in discipline_parent %}  
                         var discipline = {{ discipline_child.name | json }};
+                        var contact_hours = {{ product.metafields.colibri.contact_hours | json }};
                         var providerCodeNull = (providerCode == '0' || providerCode == null || providerCode == '') ? "visiblity-hidden" : "";
                         var course_hoursNull = (course_hours == '0' || course_hours == null || course_hours == '') ? "visiblity-hidden" : "";
-                        var is_mandatoryNull = (is_mandatory == '0' || is_mandatory == null || is_mandatory == '') ? "visiblity-hidden" : "";
+                        if((course_hoursNull == "visiblity-hidden") && (contact_hours != "0" && contact_hours !== null && contact_hours !== "")){
+                          course_hoursNull = "";
+                          course_hours = contact_hours;
+                        }
+                        if(is_mandatory == '0' || is_mandatory == null || is_mandatory == ''){
+                          is_mandatory = "No";
+                        }else{
+                          is_mandatory = "Yes"
+                        }
+                       
                        if(state_selected === state && (currentDate < expirySeconds || expiry == null) && discipline === disc_selectedd){
                          if(expiry == null){
                            final_data = '<table class="table-filter"><thead><tr><th>APPROVAL STATUS</th><th>PROVIDER CODE</th><th>EXPIRATION DATE</th></tr></thead><tbody><tr><td>' + protest + '</td><td class="'+providerCodeNull+'">' + providerCode + '</td><td></td></tr></tbody></table>';
-                           // final_data += '<table class="table-filter"><thead><tr><th>HOURS</th><th>MANDATORY</th></tr></thead><tbody><tr><td class="'+course_hoursNull+'">' + course_hours + '</td><td class="'+is_mandatoryNull+'">' + is_mandatory + '</td></tr></tbody></table>';   
+                           final_data += '<table class="table-filter"><thead><tr><th>HOURS</th><th>MANDATORY</th></tr></thead><tbody><tr><td class="'+course_hoursNull+'">' + course_hours + '</td><td>' + is_mandatory + '</td></tr></tbody></table>';   
                            /*
                            if(course_hours == '0' || course_hours == null || course_hours == ''){
                              final_data = '<table class="table-filter"><thead><tr><th>APPROVAL STATUS</th><th>PROVIDER CODE</th><th>EXPIRATION DATE</th></tr></thead><tbody><tr><td>' + protest + '</td><td class="'+providerCodeNull+'">' + providerCode + '</td><td></td></tr></tbody></table><table class="table-filter"><thead><tr><th>HOURS</th><th>MANDATORY</th></tr></thead><tbody><tr><td></td><td></td></tr></tbody></table>';
@@ -94,7 +105,7 @@
                            */
                           }else{
                              final_data = '<table class="table-filter"><thead><tr><th>APPROVAL STATUS</th><th>PROVIDER CODE</th><th>EXPIRATION DATE</th></tr></thead><tbody><tr><td>' + protest + '</td><td class="'+providerCodeNull+'">' + providerCode + '</td><td>' + expiry + '</td></tr></tbody></table>';
-                             // final_data += '<table class="table-filter"><thead><tr><th>HOURS</th><th>MANDATORY</th></tr></thead><tbody><tr><td class="'+course_hoursNull+'">' + course_hours + '</td><td class="'+is_mandatoryNull+'">' + is_mandatory + '</td></tr></tbody></table>';
+                             final_data += '<table class="table-filter"><thead><tr><th>HOURS</th><th>MANDATORY</th></tr></thead><tbody><tr><td class="'+course_hoursNull+'">' + course_hours + '</td><td>' + is_mandatory + '</td></tr></tbody></table>';
                              /*
                             if(course_hours == '0' || course_hours == null || course_hours == ''){
                              final_data = '<table class="table-filter"><thead><tr><th>APPROVAL STATUS</th><th>PROVIDER CODE</th><th>EXPIRATION DATE</th></tr></thead><tbody><tr><td>' + protest + '</td><td class="'+providerCodeNull+'">' + providerCode + '</td><td>' + expiry + '</td></tr></tbody></table><table class="table-filter"><thead><tr><th>HOURS</th><th>MANDATORY</th></tr></thead><tbody><tr><td></td><td></td></tr></tbody></table>';   
@@ -118,8 +129,9 @@
               }  
             });
             </script>
-    
-            <select id="iOperation" name="iOperation" class="{% if collection.metafields.colibri.discipline != blank %}rmv_disable{% endif %}" onchange="javascript:handleSelect(this)" {% if collection.metafields.colibri.discipline == blank %}disabled=""{% endif %}>
+
+            <!-- onchange="javascript:handleSelect(this)" -->
+            <select id="iOperation" name="iOperation" class="{% if collection.metafields.colibri.discipline != blank %}rmv_disable{% endif %}" {% if collection.metafields.colibri.discipline == blank %}disabled=""{% endif %}>
               {% if collection.metafields.colibri.discipline == blank %}
                 <option value="" selected="">Choose Discipline*</option>
               {% endif %}    

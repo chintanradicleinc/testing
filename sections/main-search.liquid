@@ -66,21 +66,17 @@
       {% render 'products-toolbar', results: search %}
     {%- endif -%}
     {% endcomment %}
-    {% assign paginate_count = section.settings.products_per_page %}
-    {% if search.types.last == "product" %}
-      {% assign paginate_count = search.results_count %}
-    {% endif %}
-    {%- paginate search.results by paginate_count -%}
+
+    {%- paginate search.results by search.results_count -%}
       {% if search.types.last == "product" %}<span style="display:none" id="banner_count">({{ search.results_count }}) Courses</span>{% endif %}
       <custom-pagination data-num-results="{{ search.results_count }}" class="block main-products-grid{% if settings.card_contain %} main-products-grid--contained{% endif %} flex" data-layout="grid" data-compare="{{ compare_toggle }}" data-infinite-scroll="{{ settings.pagination_infinite }}" data-pause-infinite-scroll="false">
         {% if search.types.last == "product" %}
-        {%- if section.settings.enable_filtering -%}
-          <div class="main-products-grid__filters{% if section.settings.filters_open_lg == false %} lg:js-hidden{% endif %}">
-            {% render 'pt-facet-filters', results: search %}
-          </div>
-        {%- endif -%}
+          {%- if section.settings.enable_filtering -%}
+            <div class="main-products-grid__filters{% if section.settings.filters_open_lg == false %} lg:js-hidden{% endif %}">
+              {% render 'pt-facet-filters', results: search %}
+            </div>
+          {%- endif -%}
         {% endif %}
-
         <div class="main-products-grid__results relative flex-auto" id="filter-results">
           {% include 'pt-with-icon-text' %}
           {%- if collection.products.size == 0 -%}

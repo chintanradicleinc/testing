@@ -533,8 +533,9 @@
                               <div class="col-start-1 col-end-3">
                               <div class="promo-links-image">   
                                    <div class="promo-links-category">
-                                     {% if pages[child_link.object.handle].metafields.colibri.course_navigation_links.value %}
-                                       <p>{{ pages[child_link.object.handle].metafields.colibri.course_navigation_links | metafield_tag }}</p>
+      
+                                      {% if pages[child_link.object.handle].metafields.custom.courses_navigation_html.value %}
+                                       <p>{{ pages[child_link.object.handle].metafields.custom.courses_navigation_html }}</p>
                                       {% endif %} 
                                    </div>
 

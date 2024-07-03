@@ -188,7 +188,6 @@ if (!customElements.get('product-form')) {
 
         const response = await fetch(theme.routes.cartAdd, fetchRequestOpts);
         const data = await response.json();
-        // console.log(data);
         let error = typeof data.description === 'string' ? data.description : data.message;
         if (data.errors && typeof data.errors === 'object') {
           error = Object.entries(data.errors).map((item) => item[1].join(', '));
@@ -259,7 +258,6 @@ if (!customElements.get('product-form')) {
           }));
         }
       } catch (error) {
-        console.log(error); // eslint-disable-line
         this.dispatchEvent(new CustomEvent('on:cart:error', {
           bubbles: true,
           detail: {
@@ -383,7 +381,6 @@ if (!customElements.get('product-form')) {
       }
       await this.updateDisciplines(state);
       state = this.form.querySelector("#iFunction_2").value;
-      console.log(state);
       discipline = this.form.querySelector("#iOperation_2").value;
       if((state === "") || (discipline === "")){
         this.form.querySelector('.new_category').classList.add('show_select');
@@ -406,7 +403,6 @@ if (!customElements.get('product-form')) {
           if(jsonB[name_id]['profession']){
             for(const i in jsonB[name_id]['profession']){
               let temp_array = Object.keys(jsonB[name_id]['profession'][i]);
-              console.log(temp_array);
               let disciplines = [];
               for(const j of temp_array){
                 if((j !== "code") && (jQuery.inArray(j, disciplines) == -1)){
@@ -427,7 +423,6 @@ if (!customElements.get('product-form')) {
           if(state_drop.querySelector('option[value="'+state_drop.value+'"]').getAttribute('disabled') !== null){
             state_drop.value = "";
           }
-          console.log("I am called!");
           await this.updateDisciplines(state_drop.value);
         }
       }
